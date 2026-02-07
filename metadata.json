@@ -1,0 +1,8 @@
+{
+  "name": "Botanica AI",
+  "description": "An AI-powered botany assistant to help you manage your garden, orchard, or houseplants. Identify plants with your camera, get personalized care schedules based on your location and local weather, and keep track of all your plants in one place.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
