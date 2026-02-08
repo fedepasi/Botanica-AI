@@ -4,7 +4,7 @@ import { Plant, CareTask, Coords, WeatherInfo } from '../types';
 import { marked } from 'marked';
 
 // AI client setup
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
 
 // Helper function to safely parse JSON that might be wrapped in markdown
 const parseJsonFromMarkdown = <T>(markdownString: string): T => {
