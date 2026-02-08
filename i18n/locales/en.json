@@ -58,5 +58,15 @@
   "plantStatusHealthy": "Healthy",
   "plantStatusNeedsAttention": "Needs Attention",
   "startingCamera": "Starting camera...",
-  "errorCamera": "Could not access camera. Please check permissions."
+  "errorCamera": "Could not access camera. Please check permissions.",
+  "catPruning": "Pruning",
+  "catGrafting": "Grafting",
+  "catWatering": "Watering",
+  "catGeneral": "General Care",
+  "botanicaAdvisor": "Botanica Advisor",
+  "seasonalAlerts": "Seasonal Alerts",
+  "chatTitle": "Chat with Botanica",
+  "chatPlaceholder": "Ask something about your plants...",
+  "botanicaGreeting": "Hi! I'm Botanica. How can I help you with your garden today?",
+  "errorChat": "Sorry, I couldn't respond. Please try again later."
 }

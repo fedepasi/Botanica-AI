@@ -1,0 +1,17 @@
+{
+    "name": "Botanica AI",
+    "short_name": "Botanica",
+    "description": "Your Proactive AI Orchard & Garden Companion",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f0fdf4",
+    "theme_color": "#22c55e",
+    "icons": [
+        {
+            "src": "/icon.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

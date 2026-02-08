@@ -12,7 +12,7 @@ const WeatherDisplay: React.FC = () => {
     const { t } = useTranslation();
 
     if (!weather) return null;
-    
+
     const getIconClass = (code: number): string => {
         if ([0, 1].includes(code)) return 'fa-sun'; // Clear
         if ([2].includes(code)) return 'fa-cloud-sun'; // Partly cloudy
@@ -58,22 +58,36 @@ const TaskItem: React.FC<{ task: CareTask }> = ({ task }) => {
         }
     };
 
+    const getCategoryIcon = (category?: CareTask['category']) => {
+        switch (category) {
+            case 'pruning':
+                return { icon: 'fa-scissors', color: 'text-purple-500' };
+            case 'grafting':
+                return { icon: 'fa-code-branch', color: 'text-orange-500' };
+            case 'watering':
+                return { icon: 'fa-droplet', color: 'text-blue-500' };
+            default:
+                return { icon: 'fa-leaf', color: 'text-green-500' };
+        }
+    }
+
     const timingInfo = getTimingInfo(task.timing);
-    
+    const catInfo = getCategoryIcon(task.category);
+
     return (
-        <div 
+        <div
             onClick={() => toggleTaskCompletion(taskId)}
             className={`flex items-start p-4 rounded-lg cursor-pointer transition-all duration-300 shadow-md ${isCompleted ? 'bg-green-100 text-gray-500' : 'bg-white hover:bg-gray-50'}`}
         >
             <div className={`mr-4 mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${isCompleted ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}>
-                {isCompleted && <i className="fa-solid fa-check text-white text-sm"></i>}
+                {isCompleted ? <i className="fa-solid fa-check text-white text-sm"></i> : <i className={`fa-solid ${catInfo.icon} ${catInfo.color} text-xs`}></i>}
             </div>
             <div className="flex-grow">
                 <p className={`font-semibold ${isCompleted ? 'line-through' : 'text-gray-800'}`}>{task.task}: {task.plantName}</p>
                 <p className={`text-sm ${isCompleted ? 'line-through' : ''}`}>{task.reason}</p>
             </div>
             {!isCompleted && (
-                 <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${timingInfo.textColor} ${timingInfo.bgColor}`}>
+                <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${timingInfo.textColor} ${timingInfo.bgColor}`}>
                     {timingInfo.label}
                 </span>
             )}
@@ -86,9 +100,15 @@ export const HomeScreen: React.FC = () => {
     const { plants, isLoaded: isGardenLoaded } = useGarden();
     const { tasks, isLoading, error } = useCareplan();
 
-    const sortedTasks = useMemo(() => {
+    const adviceTasks = useMemo(() => {
+        return tasks.filter(t => t.category === 'pruning' || t.category === 'grafting');
+    }, [tasks]);
+
+    const otherTasks = useMemo(() => {
         const timingOrder: { [key in CareTask['timing']]: number } = { 'Overdue': 1, 'Today': 2, 'This Week': 3 };
-        return [...tasks].sort((a, b) => timingOrder[a.timing] - timingOrder[b.timing]);
+        return tasks
+            .filter(t => t.category !== 'pruning' && t.category !== 'grafting')
+            .sort((a, b) => timingOrder[a.timing] - timingOrder[b.timing]);
     }, [tasks]);
 
     if (isLoading || !isGardenLoaded) {
@@ -107,19 +127,37 @@ export const HomeScreen: React.FC = () => {
     }
 
     const hasPlants = plants.length > 0;
-    
+
     return (
         <div className="p-4 pb-20">
             <h1 className="text-4xl font-bold text-green-800 mb-2">{t('welcomeTitle')}</h1>
             <p className="text-gray-500 mb-6">{t('welcomeMessage')}</p>
-            
+
             {hasPlants && <WeatherDisplay />}
+
+            {adviceTasks.length > 0 && (
+                <div className="mb-8 animate-fade-in">
+                    <div className="flex items-center space-x-2 mb-4">
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <i className="fa-solid fa-wand-magic-sparkles text-green-600"></i>
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-800">{t('botanicaAdvisor')}</h2>
+                    </div>
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-1 rounded-xl shadow-inner">
+                        <div className="space-y-3 p-2">
+                            {adviceTasks.map((task, index) => (
+                                <TaskItem key={`advice-${task.plantName}-${task.task}-${index}`} task={task} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('upcomingTasks')}</h2>
 
-            {sortedTasks.length > 0 ? (
+            {otherTasks.length > 0 || adviceTasks.length > 0 ? (
                 <div className="space-y-3">
-                    {sortedTasks.map((task, index) => (
+                    {otherTasks.map((task, index) => (
                         <TaskItem key={`${task.plantName}-${task.task}-${index}`} task={task} />
                     ))}
                 </div>
@@ -127,10 +165,10 @@ export const HomeScreen: React.FC = () => {
                 <div className="text-center py-10 px-4 bg-white rounded-lg shadow-md">
                     <i className="fa-solid fa-mug-saucer text-6xl text-gray-300 mb-4"></i>
                     <h2 className="text-xl font-semibold text-gray-700">
-                      {hasPlants ? t('noTasksToday') : t('noPlantsTitle')}
+                        {hasPlants ? t('noTasksToday') : t('noPlantsTitle')}
                     </h2>
                     <p className="text-gray-500 mt-2">
-                      {hasPlants ? t('noTasksMessage') : t('noPlantsMessage')}
+                        {hasPlants ? t('noTasksMessage') : t('noPlantsMessage')}
                     </p>
                 </div>
             )}

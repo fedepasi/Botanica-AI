@@ -58,5 +58,15 @@
   "plantStatusHealthy": "Sano",
   "plantStatusNeedsAttention": "Richiede Attenzione",
   "startingCamera": "Avvio fotocamera...",
-  "errorCamera": "Impossibile accedere alla fotocamera. Controlla i permessi."
+  "errorCamera": "Impossibile accedere alla fotocamera. Controlla i permessi.",
+  "catPruning": "Potatura",
+  "catGrafting": "Innesto",
+  "catWatering": "Irrigazione",
+  "catGeneral": "Cura Generale",
+  "botanicaAdvisor": "Consulente Botanica",
+  "seasonalAlerts": "Avvisi Stagionali",
+  "chatTitle": "Parla con Botanica",
+  "chatPlaceholder": "Chiedi qualcosa sulle tue piante...",
+  "botanicaGreeting": "Ciao! Sono Botanica. Come posso aiutarti oggi con il tuo giardino?",
+  "errorChat": "Spiacente, non ho potuto rispondere. Riprova più tardi."
 }

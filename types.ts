@@ -8,7 +8,14 @@ export interface Plant {
   notes: string;
 }
 
-export type Screen = 'home' | 'garden' | 'addPlant' | 'plantDetail' | 'profile';
+export type Screen = 'home' | 'garden' | 'addPlant' | 'plantDetail' | 'profile' | 'chat';
+
+export interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'botanica';
+  timestamp: Date;
+}
 
 export type PlantStatus = 'healthy' | 'needs_attention';
 
@@ -17,6 +24,7 @@ export interface CareTask {
   task: string;
   reason: string;
   timing: 'Overdue' | 'Today' | 'This Week';
+  category?: 'pruning' | 'grafting' | 'watering' | 'general';
 }
 
 export interface Coords {
@@ -31,9 +39,9 @@ export interface WeatherInfo {
 }
 
 export interface WeatherForecast {
-    daily: {
-        time: string[];
-        temperature_2m_max: number[];
-        temperature_2m_min: number[];
-    }
+  daily: {
+    time: string[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+  }
 }

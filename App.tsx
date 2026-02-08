@@ -4,6 +4,7 @@ import { GardenScreen } from './screens/GardenScreen';
 import { AddPlantScreen } from './screens/AddPlantScreen';
 import { PlantDetailScreen } from './screens/PlantDetailScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
+import { ChatScreen } from './screens/ChatScreen';
 import { BottomNav } from './components/BottomNav';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { CareplanProvider } from './contexts/CareplanContext';
@@ -26,6 +27,8 @@ const AppContent: React.FC = () => {
         return <GardenScreen onSelectPlant={handleSelectPlant} onAddPlant={() => setActiveScreen('addPlant')} />;
       case 'addPlant':
         return <AddPlantScreen onBack={() => setActiveScreen('garden')} onPlantAdded={() => setActiveScreen('garden')} />;
+      case 'chat':
+        return <ChatScreen />;
       case 'plantDetail':
         return selectedPlant ? <PlantDetailScreen plant={selectedPlant} onBack={() => setActiveScreen('garden')} /> : <GardenScreen onSelectPlant={handleSelectPlant} onAddPlant={() => setActiveScreen('addPlant')} />;
       case 'profile':
