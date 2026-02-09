@@ -111,17 +111,20 @@ export const identifyPlant = async (
 // Plant type for image generation
 type PlantImageType = 'fruit' | 'flower' | 'ornamental';
 
-const getImagePromptForPlantType = (plantName: string, plantType: PlantImageType): string => {
-  const baseStyle = 'Use a color palette featuring forest green (#007A33), tomato orange (#FF6B35), and warm beige (#FDF8F0). The style should be clean, modern, and artistic, suitable for a high-end gardening app. White or cream background.';
+const getImagePromptForPlantType = (plantName: string, plantType: PlantImageType, varietyDescription: string): string => {
+  const baseStyle = 'The style should be clean, modern, and artistic, suitable for a high-end gardening app. Soft white or cream background. Photorealistic rendering.';
+  
+  // Critical: emphasize variety-specific accuracy
+  const varietyEmphasis = `CRITICAL: This is specifically a "${plantName}" - you MUST accurately represent this exact variety with its characteristic colors, shape, and appearance. ${varietyDescription}. Do NOT use generic colors or shapes from other varieties.`;
   
   switch (plantType) {
     case 'fruit':
-      return `A beautiful, premium icon featuring the ripe fruit of a ${plantName} plant. Focus on the fruit as the main subject, showing its characteristic color and shape. ${baseStyle}`;
+      return `A beautiful, premium botanical illustration of the ripe fruit from a ${plantName}. ${varietyEmphasis} Show the fruit as the main subject with its TRUE characteristic color, texture, and shape specific to this variety. ${baseStyle}`;
     case 'flower':
-      return `A beautiful, premium icon featuring the flower of a ${plantName} plant in full bloom. Focus on the flower as the main subject, showing its petals and natural beauty. ${baseStyle}`;
+      return `A beautiful, premium botanical illustration of the flower from a ${plantName} in full bloom. ${varietyEmphasis} Show the flower with its TRUE petal color, shape, and arrangement specific to this variety. ${baseStyle}`;
     case 'ornamental':
     default:
-      return `A beautiful, premium stylized icon of a ${plantName} plant, focusing on its distinctive foliage, branches, or overall plant silhouette. Show the characteristic leaf shape or branch structure. ${baseStyle}`;
+      return `A beautiful, premium botanical illustration of a ${plantName}, focusing on its distinctive foliage or branch structure. ${varietyEmphasis} Show the TRUE leaf color, shape, and growth pattern specific to this variety. ${baseStyle}`;
   }
 };
 
@@ -140,13 +143,21 @@ export const searchPlantByName = async (
         description: 'Plant category for image generation. Use "fruit" for fruit-bearing plants (apple, lemon, tomato, etc.), "flower" for flowering plants grown for their blooms (rose, tulip, lavender, etc.), or "ornamental" for foliage plants, evergreens, and non-flowering ornamentals (fern, palm, boxwood, etc.).',
         enum: ['fruit', 'flower', 'ornamental']
       },
+      visualDescription: {
+        type: Type.STRING,
+        description: 'CRITICAL: Precise visual description of this SPECIFIC variety for accurate image generation. Include exact colors (e.g., "greenish-yellow with russet patches" NOT just "red"), shape, size, and any distinctive visual features that distinguish this variety from others. Be very specific about colors - use descriptive terms like "golden yellow", "deep crimson", "pale green with brown spots", etc.'
+      },
     },
-    required: ['name', 'description', 'careNeeds', 'plantType'],
+    required: ['name', 'description', 'careNeeds', 'plantType', 'visualDescription'],
   };
 
   const textResponse = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
-    contents: `Provide a brief description and basic care needs for a ${plantName}. Also classify the plant type for image generation purposes. Respond in ${getLanguageName(language)}.`,
+    contents: `Provide a brief description and basic care needs for a ${plantName}. 
+
+IMPORTANT: Also provide a precise visual description of this SPECIFIC variety - be very accurate about colors, shapes, and distinctive features. For example, if it's a "Renetta apple", describe that it's greenish-yellow with russet patches, NOT a generic red apple.
+
+Respond in ${getLanguageName(language)}.`,
     config: {
       responseMimeType: 'application/json',
       responseSchema,
@@ -155,13 +166,17 @@ export const searchPlantByName = async (
 
   let plantData;
   try {
-    plantData = parseJsonFromMarkdown<{ name: string; description: string; careNeeds: string; plantType: PlantImageType }>(textResponse.text);
+    plantData = parseJsonFromMarkdown<{ name: string; description: string; careNeeds: string; plantType: PlantImageType; visualDescription: string }>(textResponse.text);
   } catch (e) {
     console.error("Failed to parse plant search JSON:", e);
     throw new Error("Could not find information for the specified plant. Please try again.");
   }
 
-  const imagePrompt = getImagePromptForPlantType(plantName, plantData.plantType || 'ornamental');
+  const imagePrompt = getImagePromptForPlantType(
+    plantName, 
+    plantData.plantType || 'ornamental',
+    plantData.visualDescription || ''
+  );
   
   const imageResponse = await ai.models.generateImages({
     model: 'imagen-4.0-generate-001',
