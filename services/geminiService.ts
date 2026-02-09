@@ -182,7 +182,11 @@ export const generateAnnualCareplan = async (
     weatherContext = `Current weather: ${weather.temperature}°C, ${weather.condition}.`;
   }
 
+  const langName = getLanguageName(language);
+
   const prompt = `
+IMPORTANT: ALL text content in the "task" and "reason" fields MUST be written in ${langName}. Do NOT use English.
+
 You are an expert horticulturist. Generate a STRUCTURAL annual care plan for the year ${year} for the following plant.
 
 Plant: ${plant.name}
@@ -194,7 +198,7 @@ ${weatherContext}
 
 Generate 15-30 STRUCTURAL tasks distributed across all 12 months. These are time-sensitive tasks with precise optimal windows.
 
-Categories to use:
+Categories to use (keep these category values in English, they are identifiers):
 - "pruning" - Pruning (structural, with window)
 - "grafting" - Grafting (structural, tight window)
 - "seeding" - Seeding (structural)
@@ -207,16 +211,16 @@ Categories to use:
 DO NOT generate routine watering tasks. Those will be generated separately based on real-time weather.
 
 Each task must have:
-- "task": short action description
-- "reason": brief explanation of why and when
-- "category": one of the categories above
+- "task": short action description (in ${langName})
+- "reason": brief explanation of why and when (in ${langName})
+- "category": one of the categories above (keep in English)
 - "taskNature": always "structural" for this function
 - "scheduledMonth": integer 1-12
 - "windowStart": "YYYY-MM-DD" start of optimal window
 - "windowEnd": "YYYY-MM-DD" end of optimal window
 - "priority": "urgent" | "normal" | "low"
 
-Respond in ${getLanguageName(language)}. Respond ONLY with a JSON array of task objects.
+Respond ONLY with a JSON array of task objects. Remember: "task" and "reason" MUST be in ${langName}.
 `;
 
   const responseSchema = {
@@ -312,7 +316,11 @@ export const adaptBiweeklyTasks = async (
     }
   }
 
+  const langName = getLanguageName(language);
+
   const prompt = `
+IMPORTANT: ALL text content in "task" and "reason" fields MUST be written in ${langName}. Do NOT use English for these fields.
+
 You are an expert horticulturist performing a biweekly adaptation of care tasks.
 
 Current date: ${now.toISOString().split('T')[0]}
@@ -334,10 +342,10 @@ Your job:
 3. NEVER re-propose tasks that are already completed.
 
 Respond with a JSON object with two arrays:
-- "newTasks": array of new tasks to create. Each with: plantId, plantName, task, reason, category, taskNature ("routine"), scheduledMonth, windowStart (YYYY-MM-DD), windowEnd (YYYY-MM-DD), priority
+- "newTasks": array of new tasks to create. Each with: plantId, plantName, task (in ${langName}), reason (in ${langName}), category (in English), taskNature ("routine"), scheduledMonth, windowStart (YYYY-MM-DD), windowEnd (YYYY-MM-DD), priority
 - "modifications": array of modifications to existing tasks. Each with: taskId, newWindowStart (optional), newWindowEnd (optional), newPriority (optional)
 
-If nothing needs to change, return empty arrays. Respond in ${getLanguageName(language)}. Respond ONLY with JSON.
+If nothing needs to change, return empty arrays. Respond ONLY with JSON. Remember: "task" and "reason" MUST be in ${langName}.
 `;
 
   const responseSchema = {
