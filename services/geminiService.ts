@@ -108,6 +108,23 @@ export const identifyPlant = async (
   }
 };
 
+// Plant type for image generation
+type PlantImageType = 'fruit' | 'flower' | 'ornamental';
+
+const getImagePromptForPlantType = (plantName: string, plantType: PlantImageType): string => {
+  const baseStyle = 'Use a color palette featuring forest green (#007A33), tomato orange (#FF6B35), and warm beige (#FDF8F0). The style should be clean, modern, and artistic, suitable for a high-end gardening app. White or cream background.';
+  
+  switch (plantType) {
+    case 'fruit':
+      return `A beautiful, premium icon featuring the ripe fruit of a ${plantName} plant. Focus on the fruit as the main subject, showing its characteristic color and shape. ${baseStyle}`;
+    case 'flower':
+      return `A beautiful, premium icon featuring the flower of a ${plantName} plant in full bloom. Focus on the flower as the main subject, showing its petals and natural beauty. ${baseStyle}`;
+    case 'ornamental':
+    default:
+      return `A beautiful, premium stylized icon of a ${plantName} plant, focusing on its distinctive foliage, branches, or overall plant silhouette. Show the characteristic leaf shape or branch structure. ${baseStyle}`;
+  }
+};
+
 export const searchPlantByName = async (
   plantName: string,
   language: string
@@ -118,13 +135,18 @@ export const searchPlantByName = async (
       name: { type: Type.STRING, description: 'Common name of the plant.' },
       description: { type: Type.STRING, description: 'A brief description of the plant.' },
       careNeeds: { type: Type.STRING, description: 'Basic care needs (sunlight, water, soil).' },
+      plantType: { 
+        type: Type.STRING, 
+        description: 'Plant category for image generation. Use "fruit" for fruit-bearing plants (apple, lemon, tomato, etc.), "flower" for flowering plants grown for their blooms (rose, tulip, lavender, etc.), or "ornamental" for foliage plants, evergreens, and non-flowering ornamentals (fern, palm, boxwood, etc.).',
+        enum: ['fruit', 'flower', 'ornamental']
+      },
     },
-    required: ['name', 'description', 'careNeeds'],
+    required: ['name', 'description', 'careNeeds', 'plantType'],
   };
 
   const textResponse = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
-    contents: `Provide a brief description and basic care needs for a ${plantName}. Respond in ${getLanguageName(language)}.`,
+    contents: `Provide a brief description and basic care needs for a ${plantName}. Also classify the plant type for image generation purposes. Respond in ${getLanguageName(language)}.`,
     config: {
       responseMimeType: 'application/json',
       responseSchema,
@@ -133,15 +155,17 @@ export const searchPlantByName = async (
 
   let plantData;
   try {
-    plantData = parseJsonFromMarkdown<{ name: string; description: string; careNeeds: string }>(textResponse.text);
+    plantData = parseJsonFromMarkdown<{ name: string; description: string; careNeeds: string; plantType: PlantImageType }>(textResponse.text);
   } catch (e) {
     console.error("Failed to parse plant search JSON:", e);
     throw new Error("Could not find information for the specified plant. Please try again.");
   }
 
+  const imagePrompt = getImagePromptForPlantType(plantName, plantData.plantType || 'ornamental');
+  
   const imageResponse = await ai.models.generateImages({
     model: 'imagen-4.0-generate-001',
-    prompt: `A beautiful, premium plant icon of a ${plantName}. Use a color palette featuring forest green (#007A33), tomato orange (#FF6B35), and warm beige (#FDF8F0). The style should be clean, modern, and artistic, suitable for a high-end gardening app.`,
+    prompt: imagePrompt,
     config: {
       numberOfImages: 1,
       outputMimeType: 'image/jpeg',
