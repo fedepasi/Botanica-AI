@@ -81,7 +81,7 @@ const toDisplayTask = (task: PersistentTask): DisplayTask => ({
 
 export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { plants, isLoaded: isGardenLoaded } = useGarden();
-  const { language } = useTranslation();
+  const { language, isLanguageLoaded } = useTranslation();
   const { user } = useAuth();
 
   const [allTasks, setAllTasks] = useState<PersistentTask[]>([]);
@@ -240,7 +240,7 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   // Main initialization
   useEffect(() => {
-    if (!isGardenLoaded || !language || !user || hasInitialized.current) return;
+    if (!isGardenLoaded || !isLanguageLoaded || !language || !user || hasInitialized.current) return;
     hasInitialized.current = true;
 
     const init = async () => {
@@ -263,7 +263,7 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
     };
 
     init();
-  }, [isGardenLoaded, language, user, fetchWeather, loadTasks, migrateExistingPlants, checkAdaptation]);
+  }, [isGardenLoaded, isLanguageLoaded, language, user, fetchWeather, loadTasks, migrateExistingPlants, checkAdaptation]);
 
   // Complete a task
   const completeTask = useCallback(async (taskId: string, notes?: string) => {

@@ -4,6 +4,12 @@ import { marked } from 'marked';
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
 
+const languageNames: Record<string, string> = {
+  en: 'English',
+  it: 'Italian',
+};
+const getLanguageName = (code: string): string => languageNames[code] || code;
+
 const parseJsonFromMarkdown = <T>(markdownString: string): T => {
   const jsonRegex = /```json\s*([\s\S]*?)\s*```/;
   const match = markdownString.match(jsonRegex);
@@ -35,7 +41,7 @@ export const identifyPlant = async (
     inlineData: { data: base64Image, mimeType },
   };
   const textPart = {
-    text: `Identify this plant. Provide its common name, a brief description, and basic care needs. Respond in ${language}.`,
+    text: `Identify this plant. Provide its common name, a brief description, and basic care needs. Respond in ${getLanguageName(language)}.`,
   };
   const responseSchema = {
     type: Type.OBJECT,
@@ -82,7 +88,7 @@ export const searchPlantByName = async (
 
   const textResponse = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
-    contents: `Provide a brief description and basic care needs for a ${plantName}. Respond in ${language}.`,
+    contents: `Provide a brief description and basic care needs for a ${plantName}. Respond in ${getLanguageName(language)}.`,
     config: {
       responseMimeType: 'application/json',
       responseSchema,
@@ -127,7 +133,7 @@ export const generateDetailedCarePlan = async (plant: Plant, language: string): 
     - Pruning tips
     - Repotting advice
 
-    Format the response as Markdown. Use headings for each section. Respond in ${language}.`;
+    Format the response as Markdown. Use headings for each section. Respond in ${getLanguageName(language)}.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
@@ -210,7 +216,7 @@ Each task must have:
 - "windowEnd": "YYYY-MM-DD" end of optimal window
 - "priority": "urgent" | "normal" | "low"
 
-Respond in ${language}. Respond ONLY with a JSON array of task objects.
+Respond in ${getLanguageName(language)}. Respond ONLY with a JSON array of task objects.
 `;
 
   const responseSchema = {
@@ -331,7 +337,7 @@ Respond with a JSON object with two arrays:
 - "newTasks": array of new tasks to create. Each with: plantId, plantName, task, reason, category, taskNature ("routine"), scheduledMonth, windowStart (YYYY-MM-DD), windowEnd (YYYY-MM-DD), priority
 - "modifications": array of modifications to existing tasks. Each with: taskId, newWindowStart (optional), newWindowEnd (optional), newPriority (optional)
 
-If nothing needs to change, return empty arrays. Respond in ${language}. Respond ONLY with JSON.
+If nothing needs to change, return empty arrays. Respond in ${getLanguageName(language)}. Respond ONLY with JSON.
 `;
 
   const responseSchema = {
@@ -427,7 +433,7 @@ export const chatWithBotanica = async (
 
     Current User Message: ${currentMessage}
 
-    IMPORTANT: Respond in the language used by the user in their current message. If uncertain, default to ${language}.
+    IMPORTANT: Respond in the language used by the user in their current message. If uncertain, default to ${getLanguageName(language)}.
     Focus on plant care, identification, pests, pruning, and gardening tips.
     Maintain a premium, supportive, and encouraging tone.
     Your name is Anica.

@@ -6,6 +6,7 @@ import { supabaseService } from '../services/supabaseService';
 
 interface LanguageContextType {
   language: string;
+  isLanguageLoaded: boolean;
   setLanguage: (language: string) => void;
   t: (key: string) => string;
 }
@@ -17,10 +18,14 @@ export const LanguageContext = createContext<LanguageContextType | undefined>(un
 export const LanguageProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [language, setLanguageState] = useState<string>(localStorage.getItem('botanica_ai_lang') || 'en');
+  const [isLanguageLoaded, setIsLanguageLoaded] = useState(false);
 
   // On login: load language preference from Supabase
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setIsLanguageLoaded(true);
+      return;
+    }
 
     const loadPreference = async () => {
       try {
@@ -31,6 +36,8 @@ export const LanguageProvider: FC<{ children: ReactNode }> = ({ children }) => {
         }
       } catch (e) {
         console.warn('Could not load language preference from Supabase:', e);
+      } finally {
+        setIsLanguageLoaded(true);
       }
     };
 
@@ -54,7 +61,7 @@ export const LanguageProvider: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, isLanguageLoaded, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );
