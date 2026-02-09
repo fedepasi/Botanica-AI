@@ -42,7 +42,7 @@ export const useGarden = () => {
       name: plantData.name,
       description: plantData.description,
       careNeeds: plantData.careNeeds,
-      image_url: plantData.imageUrl,
+      imageUrl: plantData.imageUrl,
       latitude: plantData.latitude,
       longitude: plantData.longitude,
       notes: '',

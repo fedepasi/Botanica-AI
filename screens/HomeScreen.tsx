@@ -6,6 +6,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { Spinner } from '../components/Spinner';
 import { CareTask } from '../types';
 import { useGarden } from '../hooks/useGarden';
+import { useAuth } from '../contexts/AuthContext';
 
 const WeatherDisplay: React.FC = () => {
     const { weather } = useCareplan();
@@ -113,6 +114,7 @@ const TaskItem: React.FC<{ task: CareTask }> = ({ task }) => {
 
 export const HomeScreen: React.FC = () => {
     const { t } = useTranslation();
+    const { user } = useAuth();
     const { plants, isLoaded: isGardenLoaded } = useGarden();
     const { tasks, isLoading, error } = useCareplan();
 
@@ -148,7 +150,7 @@ export const HomeScreen: React.FC = () => {
         <div className="p-6 pb-24 font-outfit">
             <div className="mb-10 pt-4">
                 <h1 className="text-5xl font-black text-gray-900 tracking-tight leading-tight">
-                    {t('welcomeTitle')}, <span className="highlight-yellow inline-block">{user.email?.split('@')[0]}</span>
+                    {t('welcomeTitle')}, <span className="highlight-yellow inline-block">{user?.email?.split('@')[0]}</span>
                 </h1>
                 <p className="text-gray-500 mt-2 text-lg font-medium tracking-wide italic decoration-garden-yellow underline decoration-2 underline-offset-4">{t('welcomeMessage')}</p>
             </div>

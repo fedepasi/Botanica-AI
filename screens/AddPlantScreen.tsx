@@ -19,6 +19,7 @@ interface ResultData {
 }
 
 export const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ onBack, onPlantAdded }) => {
+  const { user } = useAuth();
   const { language, t } = useTranslation();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +32,9 @@ export const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ onBack, onPlantA
   const [isCameraActive, setIsCameraActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const { addPlant, plantExists } = useGarden();
 
@@ -54,6 +57,12 @@ export const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ onBack, onPlantA
     }
     return () => stopCamera();
   }, []);
+
+  useEffect(() => {
+    if (resultData && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [resultData]);
 
   const startCamera = async () => {
     stopCamera(); // Stop any existing stream
@@ -106,6 +115,33 @@ export const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ onBack, onPlantA
         }
       }
     }
+  };
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const dataUrl = e.target?.result as string;
+        setImagePreview(dataUrl);
+        setResultData(null);
+        setError(null);
+        setIsLoading(true);
+        try {
+          const base64Image = dataUrl.split(',')[1];
+          const result = await identifyPlant(base64Image, file.type, language);
+          setResultData({ ...result, imageUrl: dataUrl });
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "An unknown error occurred.");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
   };
 
   const handleSearch = async () => {
@@ -213,10 +249,26 @@ export const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ onBack, onPlantA
             </div>
           ) : (
             <div className="text-center group-hover:scale-110 transition-transform duration-300">
-              <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-sm text-garden-green/40 group-hover:text-garden-green transition-colors">
-                <i className="fa-solid fa-camera text-3xl"></i>
+              <div className="flex space-x-4 mb-4">
+                <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-sm text-garden-green/40 group-hover:text-garden-green transition-colors" title={t('tapToStartCamera')}>
+                  <i className="fa-solid fa-camera text-3xl"></i>
+                </div>
+                <div
+                  className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-sm text-garden-green/40 hover:text-garden-green transition-colors"
+                  onClick={(e) => { e.stopPropagation(); triggerFileUpload(); }}
+                  title="Upload from gallery"
+                >
+                  <i className="fa-solid fa-image text-3xl"></i>
+                </div>
               </div>
-              <p className="text-xs font-black uppercase tracking-widest text-garden-green/60">{t('tapToStartCamera')}</p>
+              <p className="text-xs font-black uppercase tracking-widest text-garden-green/60">{t('tapToStartCamera')} or Upload</p>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                accept="image/*"
+                className="hidden"
+              />
             </div>
           )}
           {isLoading && !isCameraActive && (
@@ -263,12 +315,16 @@ export const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ onBack, onPlantA
           )}
 
           {resultData && (
-            <div className="text-left mt-8 p-6 bg-garden-beige/30 border border-garden-green/5 rounded-[32px] animate-fade-in">
+            <div ref={resultsRef} className="text-left mt-8 p-6 bg-garden-beige/30 border border-garden-green/5 rounded-[32px] animate-fade-in">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-2xl font-black text-gray-900 tracking-tight">{resultData.name}</h2>
-                <div className="w-8 h-8 rounded-full bg-garden-green/10 flex items-center justify-center text-garden-green">
-                  <i className="fa-solid fa-leaf text-xs"></i>
-                </div>
+                <button
+                  onClick={triggerFileUpload}
+                  className="w-10 h-10 rounded-full bg-garden-green/10 flex items-center justify-center text-garden-green hover:bg-garden-green/20 transition-colors"
+                  title="Replace icon with photo"
+                >
+                  <i className="fa-solid fa-camera-rotate text-sm"></i>
+                </button>
               </div>
               <p className="text-gray-600 font-medium italic text-sm leading-relaxed mb-6">{resultData.description}</p>
 

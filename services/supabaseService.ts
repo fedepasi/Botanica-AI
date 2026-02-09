@@ -63,7 +63,13 @@ export const supabaseService = {
         const { data, error } = await supabase.storage
             .from(getPrefixedBucketName('images'))
             .upload(path, file);
-        if (error) throw error;
+
+        if (error) {
+            if (error.message.includes('not found')) {
+                throw new Error(`Storage Bucket 'botanica_images' not found. Please create a public bucket named 'botanica_images' in your Supabase dashboard.`);
+            }
+            throw error;
+        }
         return data;
     },
 

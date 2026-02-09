@@ -47,9 +47,9 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setIsLoading(true);
     setError(null);
 
-    // Get location and weather
-    let currentCoords: Coords;
-    let weatherInfo: WeatherInfo;
+    // Get location and weather (non-blocking — dashboard works without it)
+    let currentCoords: Coords | null = null;
+    let weatherInfo: WeatherInfo | null = null;
     try {
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
@@ -58,12 +58,12 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
         };
-        
+
         const weatherResponse = await fetch(
             `https://api.open-meteo.com/v1/forecast?latitude=${currentCoords.latitude}&longitude=${currentCoords.longitude}&current=temperature_2m,weather_code`
         );
         if (!weatherResponse.ok) throw new Error('Failed to fetch weather data.');
-        
+
         const weatherData = await weatherResponse.json();
         const currentWeather = weatherData.current;
         weatherInfo = {
@@ -74,14 +74,12 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setWeather(weatherInfo);
 
     } catch (e) {
-        const msg = e instanceof Error ? e.message : 'Could not get location or weather.';
-        setError(`Failed to generate plan: ${msg}`);
-        setIsLoading(false);
-        return;
+        console.warn('Could not get location or weather:', e);
+        // Continue without weather — dashboard still works
     }
 
-    // Generate to-do list if there are plants
-    if (plants.length > 0) {
+    // Generate to-do list if there are plants and we have location data
+    if (plants.length > 0 && currentCoords && weatherInfo) {
         try {
             const generatedTasks = await generateToDoList(plants, currentCoords, weatherInfo, language);
             setTasks(generatedTasks);
@@ -91,9 +89,9 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
             setTasks([]);
         }
     } else {
-        setTasks([]); // No plants, no tasks
+        setTasks([]); // No plants or no location data
     }
-    
+
     setIsLoading(false);
 
   }, [isGardenLoaded, plants, language]);

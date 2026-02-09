@@ -3,7 +3,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
 
 export const ProfileScreen: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, language, setLanguage } = useTranslation();
   const { user, signOut } = useAuth();
 
   return (
@@ -39,6 +39,45 @@ export const ProfileScreen: React.FC = () => {
               <p className="text-[10px] text-garden-green font-black uppercase tracking-widest mb-0.5">{t('email')}</p>
               <p className="font-bold text-gray-700">{user?.email}</p>
             </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100">
+          <div className="flex items-center mb-6">
+            <div className="w-12 h-12 bg-garden-beige rounded-2xl flex items-center justify-center mr-4 text-garden-green">
+              <i className="fa-solid fa-language text-xl"></i>
+            </div>
+            <div>
+              <p className="text-[10px] text-garden-green font-black uppercase tracking-widest mb-0.5">{t('languageSettings')}</p>
+              <p className="font-bold text-gray-900">{t('selectLanguage')}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={() => setLanguage('en')}
+              className={`p-4 rounded-3xl border-2 transition-all flex flex-col items-center justify-center space-y-2 ${language === 'en'
+                ? 'border-garden-green bg-garden-green/5 shadow-md shadow-garden-green/10'
+                : 'border-transparent bg-garden-beige/30 grayscale opacity-60 hover:opacity-100 hover:grayscale-0'
+                }`}
+            >
+              <span className="text-2xl">🇬🇧</span>
+              <span className={`text-[10px] font-black uppercase tracking-widest ${language === 'en' ? 'text-garden-green' : 'text-gray-500'}`}>
+                {t('english')}
+              </span>
+            </button>
+            <button
+              onClick={() => setLanguage('it')}
+              className={`p-4 rounded-3xl border-2 transition-all flex flex-col items-center justify-center space-y-2 ${language === 'it'
+                ? 'border-garden-green bg-garden-green/5 shadow-md shadow-garden-green/10'
+                : 'border-transparent bg-garden-beige/30 grayscale opacity-60 hover:opacity-100 hover:grayscale-0'
+                }`}
+            >
+              <span className="text-2xl">🇮🇹</span>
+              <span className={`text-[10px] font-black uppercase tracking-widest ${language === 'it' ? 'text-garden-green' : 'text-gray-500'}`}>
+                {t('italian')}
+              </span>
+            </button>
           </div>
         </div>
 

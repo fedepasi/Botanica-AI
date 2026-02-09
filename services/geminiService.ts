@@ -113,7 +113,7 @@ export const searchPlantByName = async (
 
   const imageResponse = await ai.models.generateImages({
     model: 'imagen-4.0-generate-001',
-    prompt: `A clear, high-quality photo of a single, healthy ${plantName} plant in a simple pot, against a neutral background.`,
+    prompt: `A beautiful, premium plant icon of a ${plantName}. Use a color palette featuring forest green (#007A33), tomato orange (#FF6B35), and warm beige (#FDF8F0). The style should be clean, modern, and artistic, suitable for a high-end gardening app.`,
     config: {
       numberOfImages: 1,
       outputMimeType: 'image/jpeg',
@@ -234,7 +234,7 @@ export const chatWithBotanica = async (
   const currentMessage = messages[messages.length - 1].text;
 
   const prompt = `
-    You are Botanica, a friendly and expert AI garden assistant. 
+    You are Anica, a friendly and expert AI garden assistant. 
     ${plantContext}
     
     Conversation history:
@@ -242,10 +242,11 @@ export const chatWithBotanica = async (
     
     Current User Message: ${currentMessage}
     
-    Provide a helpful, concise, and expert response in ${language}. 
+    IMPORTANT: Respond in the language used by the user in their current message. If uncertain, default to ${language}.
     Focus on plant care, identification, pests, pruning, and gardening tips. 
     Maintain a premium, supportive, and encouraging tone.
-  `;
+    Your name is Anica.
+    `;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',

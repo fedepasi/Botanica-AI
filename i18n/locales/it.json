@@ -63,10 +63,12 @@
   "catGrafting": "Innesto",
   "catWatering": "Irrigazione",
   "catGeneral": "Cura Generale",
-  "botanicaAdvisor": "Consulente Botanica",
+  "botanicaAdvisor": "Anica",
   "seasonalAlerts": "Avvisi Stagionali",
-  "chatTitle": "Parla con Botanica",
+  "chatTitle": "Parla con Anica",
   "chatPlaceholder": "Chiedi qualcosa sulle tue piante...",
-  "botanicaGreeting": "Ciao! Sono Botanica. Come posso aiutarti oggi con il tuo giardino?",
-  "errorChat": "Spiacente, non ho potuto rispondere. Riprova più tardi."
+  "botanicaGreeting": "Ciao! Sono Anica. Come posso aiutarti oggi con il tuo giardino?",
+  "errorChat": "Spiacente, non ho potuto rispondere. Riprova più tardi.",
+  "signInMessage": "Accedi per gestire il tuo giardino premium",
+  "joinCommunity": "Unisciti alla comunità di giardinieri premium"
 }

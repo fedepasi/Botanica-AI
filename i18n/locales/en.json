@@ -63,10 +63,12 @@
   "catGrafting": "Grafting",
   "catWatering": "Watering",
   "catGeneral": "General Care",
-  "botanicaAdvisor": "Botanica Advisor",
+  "botanicaAdvisor": "Anica",
   "seasonalAlerts": "Seasonal Alerts",
-  "chatTitle": "Chat with Botanica",
+  "chatTitle": "Chat with Anica",
   "chatPlaceholder": "Ask something about your plants...",
-  "botanicaGreeting": "Hi! I'm Botanica. How can I help you with your garden today?",
-  "errorChat": "Sorry, I couldn't respond. Please try again later."
+  "botanicaGreeting": "Hi! I'm Anica. How can I help you with your garden today?",
+  "errorChat": "Sorry, I couldn't respond. Please try again later.",
+  "signInMessage": "Sign in to manage your premium garden",
+  "joinCommunity": "Join the community of premium gardeners"
 }
