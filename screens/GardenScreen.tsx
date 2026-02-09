@@ -1,18 +1,14 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGarden } from '../hooks/useGarden';
-import { Plant, PlantStatus } from '../types';
+import { PlantStatus } from '../types';
 import { Spinner } from '../components/Spinner';
 import { useTranslation } from '../hooks/useTranslation';
 import { useCareplan } from '../hooks/useCareplan';
 import { useCompletedTasks } from '../hooks/useCompletedTasks';
 
-
-interface GardenScreenProps {
-  onSelectPlant: (plant: Plant) => void;
-  onAddPlant: () => void;
-}
-
-export const GardenScreen: React.FC<GardenScreenProps> = ({ onSelectPlant, onAddPlant }) => {
+export const GardenScreen: React.FC = () => {
+  const navigate = useNavigate();
   const { plants, isLoaded } = useGarden();
   const { t } = useTranslation();
   const { tasks, isLoading: isCareplanLoading } = useCareplan();
@@ -63,7 +59,7 @@ export const GardenScreen: React.FC<GardenScreenProps> = ({ onSelectPlant, onAdd
           <h2 className="text-2xl font-bold text-gray-800 tracking-tight">{t('gardenEmptyTitle')}</h2>
           <p className="text-gray-500 mt-2 mb-8 font-medium italic">{t('gardenEmptyMessage')}</p>
           <button
-            onClick={onAddPlant}
+            onClick={() => navigate('/garden/add')}
             className="w-full bg-garden-green text-white font-black py-4 px-8 rounded-2xl shadow-lg shadow-garden-green/20 hover:scale-105 transition-all text-sm uppercase tracking-widest"
           >
             {t('addFirstPlant')}
@@ -77,10 +73,16 @@ export const GardenScreen: React.FC<GardenScreenProps> = ({ onSelectPlant, onAdd
               <div
                 key={plant.id}
                 className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden cursor-pointer transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-garden-green/5 transition-all duration-300"
-                onClick={() => onSelectPlant(plant)}
+                onClick={() => navigate(`/garden/${plant.id}`)}
               >
                 <div className="relative h-40">
-                  <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover" />
+                  {plant.imageUrl ? (
+                    <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-garden-beige flex items-center justify-center">
+                      <i className="fa-solid fa-seedling text-4xl text-garden-green/30"></i>
+                    </div>
+                  )}
                   {status && (
                     <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border border-white shadow-sm ${status === 'healthy' ? 'bg-garden-green text-white' : 'bg-garden-yellow text-gray-900'
                       }`}>
@@ -95,7 +97,7 @@ export const GardenScreen: React.FC<GardenScreenProps> = ({ onSelectPlant, onAdd
             )
           })}
           <div
-            onClick={onAddPlant}
+            onClick={() => navigate('/garden/add')}
             className="bg-garden-beige border-4 border-dashed border-garden-green/20 rounded-[32px] cursor-pointer flex flex-col items-center justify-center p-6 text-garden-green/40 hover:bg-garden-green/5 hover:border-garden-green/40 hover:text-garden-green transition-all group min-h-[180px]"
             aria-label={t('addPlant')}
           >

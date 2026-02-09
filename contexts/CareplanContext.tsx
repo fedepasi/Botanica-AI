@@ -3,6 +3,8 @@ import { CareTask, Coords, WeatherInfo } from '../types';
 import { useGarden } from '../hooks/useGarden';
 import { generateToDoList } from '../services/geminiService';
 import { useTranslation } from '../hooks/useTranslation';
+import { useAuth } from './AuthContext';
+import { supabaseService } from '../services/supabaseService';
 
 interface CareplanContextType {
   tasks: CareTask[];
@@ -34,15 +36,32 @@ const getWeatherCondition = (code: number): string => {
 export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { plants, isLoaded: isGardenLoaded } = useGarden();
   const { language } = useTranslation();
-  
+  const { user } = useAuth();
+
   const [tasks, setTasks] = useState<CareTask[]>([]);
   const [weather, setWeather] = useState<WeatherInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const generateCareplan = useCallback(async () => {
-    // Wait until the garden is loaded and we have the language
-    if (!isGardenLoaded || !language) return;
+  const generateCareplan = useCallback(async (forceRefresh = false) => {
+    if (!isGardenLoaded || !language || !user) return;
+
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+    // Check Supabase for a cached plan (unless forced refresh)
+    if (!forceRefresh) {
+      try {
+        const cached = await supabaseService.getCareplan(user.id, today, plants.length, language);
+        if (cached) {
+          setTasks(cached.tasks || []);
+          setWeather(cached.weather || null);
+          setIsLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.warn('Could not fetch cached careplan from Supabase:', e);
+      }
+    }
 
     setIsLoading(true);
     setError(null);
@@ -75,13 +94,13 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
     } catch (e) {
         console.warn('Could not get location or weather:', e);
-        // Continue without weather — dashboard still works
     }
 
     // Generate to-do list if there are plants and we have location data
+    let generatedTasks: CareTask[] = [];
     if (plants.length > 0 && currentCoords && weatherInfo) {
         try {
-            const generatedTasks = await generateToDoList(plants, currentCoords, weatherInfo, language);
+            generatedTasks = await generateToDoList(plants, currentCoords, weatherInfo, language);
             setTasks(generatedTasks);
         } catch(e) {
             const msg = e instanceof Error ? e.message : 'Could not generate care tasks from AI.';
@@ -89,19 +108,26 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
             setTasks([]);
         }
     } else {
-        setTasks([]); // No plants or no location data
+        setTasks([]);
+    }
+
+    // Save to Supabase
+    try {
+      await supabaseService.saveCareplan(user.id, generatedTasks, weatherInfo, plants.length, language);
+    } catch (e) {
+      console.warn('Could not save careplan to Supabase:', e);
     }
 
     setIsLoading(false);
 
-  }, [isGardenLoaded, plants, language]);
+  }, [isGardenLoaded, plants, language, user]);
 
   useEffect(() => {
     generateCareplan();
   }, [generateCareplan]);
 
   const refreshCareplan = () => {
-    generateCareplan();
+    generateCareplan(true);
   };
 
   const value = { tasks, weather, isLoading, error, refreshCareplan };

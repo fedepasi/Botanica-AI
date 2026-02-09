@@ -8,7 +8,6 @@ export interface Plant {
   notes: string;
 }
 
-export type Screen = 'home' | 'garden' | 'addPlant' | 'plantDetail' | 'profile' | 'chat';
 
 export interface Message {
   id: string;

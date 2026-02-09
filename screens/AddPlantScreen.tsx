@@ -1,15 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { identifyPlant, searchPlantByName } from '../services/geminiService';
 import { Spinner } from '../components/Spinner';
 import { useGarden } from '../hooks/useGarden';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
 import { supabaseService } from '../services/supabaseService';
-
-interface AddPlantScreenProps {
-  onBack: () => void;
-  onPlantAdded: () => void;
-}
 
 interface ResultData {
   name: string;
@@ -18,7 +14,8 @@ interface ResultData {
   imageUrl: string;
 }
 
-export const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ onBack, onPlantAdded }) => {
+export const AddPlantScreen: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { language, t } = useTranslation();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -187,7 +184,7 @@ export const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ onBack, onPlantA
           latitude: coordinates?.lat,
           longitude: coordinates?.lng
         });
-        onPlantAdded();
+        navigate('/garden');
       } catch (err) {
         setError(err instanceof Error ? err.message : t("failedToAddPlant"));
       } finally {
@@ -206,7 +203,7 @@ export const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ onBack, onPlantA
 
   return (
     <div className="p-6 pb-24 font-outfit bg-garden-beige min-h-screen">
-      <button onClick={onBack} className="flex items-center text-garden-green font-bold mb-8 hover:translate-x-[-4px] transition-transform">
+      <button onClick={() => navigate('/garden')} className="flex items-center text-garden-green font-bold mb-8 hover:translate-x-[-4px] transition-transform">
         <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-3 shadow-sm border border-gray-100">
           <i className="fa-solid fa-arrow-left text-sm"></i>
         </div>

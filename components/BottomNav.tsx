@@ -1,11 +1,6 @@
 import React from 'react';
-import { Screen } from '../types';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
-
-interface BottomNavProps {
-  activeScreen: Screen;
-  setActiveScreen: (screen: Screen) => void;
-}
 
 const NavItem: React.FC<{
   icon: string;
@@ -28,34 +23,37 @@ const NavItem: React.FC<{
   </button>
 );
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeScreen, setActiveScreen }) => {
+export const BottomNav: React.FC = () => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const path = location.pathname;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-20 bg-white shadow-[0_-5px_20px_rgba(0,0,0,0.05)] flex justify-around items-center px-4 rounded-t-[32px] border-t border-gray-100 z-50">
       <NavItem
         icon="fa-solid fa-house"
         label={t('home')}
-        isActive={activeScreen === 'home'}
-        onClick={() => setActiveScreen('home')}
+        isActive={path === '/'}
+        onClick={() => navigate('/')}
       />
       <NavItem
         icon="fa-solid fa-seedling"
         label={t('myGarden')}
-        isActive={activeScreen === 'garden'}
-        onClick={() => setActiveScreen('garden')}
+        isActive={path.startsWith('/garden')}
+        onClick={() => navigate('/garden')}
       />
       <NavItem
         icon="fa-solid fa-comment-dots"
         label={t('botanicaAdvisor')}
-        isActive={activeScreen === 'chat'}
-        onClick={() => setActiveScreen('chat')}
+        isActive={path === '/chat'}
+        onClick={() => navigate('/chat')}
       />
       <NavItem
         icon="fa-solid fa-user"
         label={t('profile')}
-        isActive={activeScreen === 'profile'}
-        onClick={() => setActiveScreen('profile')}
+        isActive={path === '/profile'}
+        onClick={() => navigate('/profile')}
       />
     </div>
   );

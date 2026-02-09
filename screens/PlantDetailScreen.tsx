@@ -1,25 +1,31 @@
-// FIX: Implemented the PlantDetailScreen component which was previously a placeholder.
 import React, { useState, useEffect } from 'react';
-import { Plant } from '../types';
+import { useParams, useNavigate } from 'react-router-dom';
 import { generateDetailedCarePlan } from '../services/geminiService';
 import { Spinner } from '../components/Spinner';
 import { useGarden } from '../hooks/useGarden';
 import { useTranslation } from '../hooks/useTranslation';
 
-interface PlantDetailScreenProps {
-  plant: Plant;
-  onBack: () => void;
-}
+export const PlantDetailScreen: React.FC = () => {
+  const { plantId } = useParams<{ plantId: string }>();
+  const navigate = useNavigate();
+  const { plants, isLoaded, removePlant, updatePlantNotes } = useGarden();
+  const { language, t } = useTranslation();
 
-export const PlantDetailScreen: React.FC<PlantDetailScreenProps> = ({ plant, onBack }) => {
+  const plant = plants.find(p => p.id === plantId);
+
   const [carePlan, setCarePlan] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
-  const { removePlant, updatePlantNotes } = useGarden();
-  const { language, t } = useTranslation();
-  const [notes, setNotes] = useState(plant.notes || '');
+  const [notes, setNotes] = useState('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
 
   useEffect(() => {
+    if (plant) {
+      setNotes(plant.notes || '');
+    }
+  }, [plant]);
+
+  useEffect(() => {
+    if (!plant) return;
     const fetchCarePlan = async () => {
       setIsLoading(true);
       const plan = await generateDetailedCarePlan(plant, language);
@@ -29,10 +35,31 @@ export const PlantDetailScreen: React.FC<PlantDetailScreenProps> = ({ plant, onB
     fetchCarePlan();
   }, [plant, language]);
 
+  if (!isLoaded) {
+    return <Spinner text={t('loadingGarden')} />;
+  }
+
+  if (!plant) {
+    return (
+      <div className="p-6 pb-24 font-outfit min-h-screen bg-garden-beige flex flex-col items-center justify-center">
+        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
+          <i className="fa-solid fa-leaf text-3xl text-gray-300"></i>
+        </div>
+        <p className="text-gray-500 font-medium mb-6">{t('plantNotFound') || 'Plant not found'}</p>
+        <button
+          onClick={() => navigate('/garden')}
+          className="bg-garden-green text-white font-bold px-6 py-3 rounded-2xl hover:scale-105 transition-all"
+        >
+          {t('backToGarden')}
+        </button>
+      </div>
+    );
+  }
+
   const handleRemovePlant = () => {
     if (window.confirm(`${t('confirmRemovePlant')} ${plant.name}?`)) {
       removePlant(plant.id);
-      onBack();
+      navigate('/garden');
     }
   };
 
@@ -46,7 +73,7 @@ export const PlantDetailScreen: React.FC<PlantDetailScreenProps> = ({ plant, onB
 
   return (
     <div className="p-6 pb-24 font-outfit min-h-screen bg-garden-beige">
-      <button onClick={onBack} className="flex items-center text-garden-green font-bold mb-6 hover:translate-x-[-4px] transition-transform">
+      <button onClick={() => navigate('/garden')} className="flex items-center text-garden-green font-bold mb-6 hover:translate-x-[-4px] transition-transform">
         <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-3 shadow-sm border border-gray-100">
           <i className="fa-solid fa-arrow-left text-sm"></i>
         </div>
@@ -55,7 +82,13 @@ export const PlantDetailScreen: React.FC<PlantDetailScreenProps> = ({ plant, onB
 
       <div className="bg-white rounded-[48px] shadow-sm border border-gray-100 overflow-hidden mb-6">
         <div className="relative h-72">
-          <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover" />
+          {plant.imageUrl ? (
+            <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-garden-beige flex items-center justify-center">
+              <i className="fa-solid fa-seedling text-6xl text-garden-green/30"></i>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           <div className="absolute bottom-6 left-6 right-6 text-white">
             <h1 className="text-4xl font-black tracking-tight">{plant.name}</h1>

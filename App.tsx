@@ -1,4 +1,5 @@
-import React, { useState, Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HomeScreen } from './screens/HomeScreen';
 import { GardenScreen } from './screens/GardenScreen';
 import { AddPlantScreen } from './screens/AddPlantScreen';
@@ -10,7 +11,6 @@ import { BottomNav } from './components/BottomNav';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { CareplanProvider } from './contexts/CareplanContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { Plant, Screen } from './types';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
   constructor(props: { children: ReactNode }) {
@@ -50,13 +50,6 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
-  const [activeScreen, setActiveScreen] = useState<Screen>('home');
-  const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
-
-  const handleSelectPlant = (plant: Plant) => {
-    setSelectedPlant(plant);
-    setActiveScreen('plantDetail');
-  };
 
   if (loading) {
     return (
@@ -70,29 +63,18 @@ const AppContent: React.FC = () => {
     return <AuthScreen />;
   }
 
-  const renderScreen = () => {
-    switch (activeScreen) {
-      case 'home':
-        return <HomeScreen />;
-      case 'garden':
-        return <GardenScreen onSelectPlant={handleSelectPlant} onAddPlant={() => setActiveScreen('addPlant')} />;
-      case 'addPlant':
-        return <AddPlantScreen onBack={() => setActiveScreen('garden')} onPlantAdded={() => setActiveScreen('garden')} />;
-      case 'chat':
-        return <ChatScreen />;
-      case 'plantDetail':
-        return selectedPlant ? <PlantDetailScreen plant={selectedPlant} onBack={() => setActiveScreen('garden')} /> : <GardenScreen onSelectPlant={handleSelectPlant} onAddPlant={() => setActiveScreen('addPlant')} />;
-      case 'profile':
-        return <ProfileScreen />;
-      default:
-        return <HomeScreen />;
-    }
-  };
-
   return (
     <main className="pb-20 min-h-screen bg-garden-beige font-outfit">
-      {renderScreen()}
-      <BottomNav activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
+      <Routes>
+        <Route path="/" element={<HomeScreen />} />
+        <Route path="/garden" element={<GardenScreen />} />
+        <Route path="/garden/add" element={<AddPlantScreen />} />
+        <Route path="/garden/:plantId" element={<PlantDetailScreen />} />
+        <Route path="/chat" element={<ChatScreen />} />
+        <Route path="/profile" element={<ProfileScreen />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <BottomNav />
     </main>
   );
 };
@@ -100,13 +82,15 @@ const AppContent: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <LanguageProvider>
-          <CareplanProvider>
-            <AppContent />
-          </CareplanProvider>
-        </LanguageProvider>
-      </AuthProvider>
+      <HashRouter>
+        <AuthProvider>
+          <LanguageProvider>
+            <CareplanProvider>
+              <AppContent />
+            </CareplanProvider>
+          </LanguageProvider>
+        </AuthProvider>
+      </HashRouter>
     </ErrorBoundary>
   );
 };
