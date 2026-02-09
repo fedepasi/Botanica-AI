@@ -6,6 +6,7 @@ import { useGarden } from '../hooks/useGarden';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
 import { supabaseService } from '../services/supabaseService';
+import { useCareplan } from '../hooks/useCareplan';
 
 interface ResultData {
   name: string;
@@ -18,8 +19,10 @@ export const AddPlantScreen: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language, t } = useTranslation();
+  const { generatePlanForPlant } = useCareplan();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resultData, setResultData] = useState<ResultData | null>(null);
@@ -43,9 +46,7 @@ export const AddPlantScreen: React.FC = () => {
     setIsCameraActive(false);
   };
 
-  // Cleanup effect
   useEffect(() => {
-    // Request location on mount
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setCoordinates({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
@@ -62,11 +63,11 @@ export const AddPlantScreen: React.FC = () => {
   }, [resultData]);
 
   const startCamera = async () => {
-    stopCamera(); // Stop any existing stream
+    stopCamera();
     setResultData(null);
     setImagePreview(null);
     setError(null);
-    setIsLoading(true); // Show spinner while camera starts
+    setIsLoading(true);
 
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
@@ -98,7 +99,6 @@ export const AddPlantScreen: React.FC = () => {
         setImagePreview(dataUrl);
         stopCamera();
 
-        // Start analysis
         setError(null);
         setIsLoading(true);
         try {
@@ -113,6 +113,7 @@ export const AddPlantScreen: React.FC = () => {
       }
     }
   };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -169,7 +170,6 @@ export const AddPlantScreen: React.FC = () => {
       try {
         let finalImageUrl = resultData.imageUrl;
 
-        // If it's a base64 from capture, upload it
         if (resultData.imageUrl.startsWith('data:')) {
           const response = await fetch(resultData.imageUrl);
           const blob = await response.blob();
@@ -178,16 +178,39 @@ export const AddPlantScreen: React.FC = () => {
           finalImageUrl = supabaseService.getPublicImageUrl(`${user.id}/${fileName}`);
         }
 
-        await addPlant({
+        const plantId = await addPlant({
           ...resultData,
           imageUrl: finalImageUrl,
           latitude: coordinates?.lat,
           longitude: coordinates?.lng
         });
+
+        setIsLoading(false);
+
+        // Generate annual care plan
+        if (plantId) {
+          setIsGeneratingPlan(true);
+          try {
+            await generatePlanForPlant({
+              id: plantId,
+              name: resultData.name,
+              description: resultData.description,
+              careNeeds: resultData.careNeeds,
+              imageUrl: finalImageUrl,
+              notes: '',
+              latitude: coordinates?.lat,
+              longitude: coordinates?.lng,
+            });
+          } catch (e) {
+            console.error('Failed to generate annual plan:', e);
+          } finally {
+            setIsGeneratingPlan(false);
+          }
+        }
+
         navigate('/garden');
       } catch (err) {
         setError(err instanceof Error ? err.message : t("failedToAddPlant"));
-      } finally {
         setIsLoading(false);
       }
     } else if (!user) {
@@ -199,6 +222,10 @@ export const AddPlantScreen: React.FC = () => {
     if (!isCameraActive) {
       startCamera();
     }
+  }
+
+  if (isGeneratingPlan) {
+    return <Spinner text={t('generatingAnnualPlan')} />;
   }
 
   return (

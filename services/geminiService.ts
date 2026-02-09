@@ -1,12 +1,9 @@
-// FIX: Implemented geminiService.ts with Gemini API calls.
 import { GoogleGenAI, Type } from '@google/genai';
-import { Plant, CareTask, Coords, WeatherInfo } from '../types';
+import { Plant, Coords, WeatherInfo, PersistentTask } from '../types';
 import { marked } from 'marked';
 
-// AI client setup
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
 
-// Helper function to safely parse JSON that might be wrapped in markdown
 const parseJsonFromMarkdown = <T>(markdownString: string): T => {
   const jsonRegex = /```json\s*([\s\S]*?)\s*```/;
   const match = markdownString.match(jsonRegex);
@@ -14,7 +11,6 @@ const parseJsonFromMarkdown = <T>(markdownString: string): T => {
   return JSON.parse(jsonString);
 };
 
-// Utility to convert file to base64
 export const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -30,24 +26,17 @@ export const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
-
-// Function to identify a plant from an image
 export const identifyPlant = async (
   base64Image: string,
   mimeType: string,
   language: string
 ): Promise<{ name: string; description: string; careNeeds: string; imageUrl: string }> => {
   const imagePart = {
-    inlineData: {
-      data: base64Image,
-      mimeType: mimeType,
-    },
+    inlineData: { data: base64Image, mimeType },
   };
-
   const textPart = {
     text: `Identify this plant. Provide its common name, a brief description, and basic care needs. Respond in ${language}.`,
   };
-
   const responseSchema = {
     type: Type.OBJECT,
     properties: {
@@ -63,13 +52,12 @@ export const identifyPlant = async (
     contents: { parts: [imagePart, textPart] },
     config: {
       responseMimeType: 'application/json',
-      responseSchema: responseSchema,
+      responseSchema,
     }
   });
 
   try {
-    const json = parseJsonFromMarkdown<{ name: string; description: string; careNeeds: string; }>(response.text);
-    // Fetch a clean image for the identified plant to ensure consistency
+    const json = parseJsonFromMarkdown<{ name: string; description: string; careNeeds: string }>(response.text);
     const imageSearchResponse = await searchPlantByName(json.name, language);
     return { ...json, imageUrl: imageSearchResponse.imageUrl };
   } catch (e) {
@@ -78,12 +66,10 @@ export const identifyPlant = async (
   }
 };
 
-// Function to search for a plant by name
 export const searchPlantByName = async (
   plantName: string,
   language: string
 ): Promise<{ name: string; description: string; careNeeds: string; imageUrl: string }> => {
-
   const responseSchema = {
     type: Type.OBJECT,
     properties: {
@@ -99,13 +85,13 @@ export const searchPlantByName = async (
     contents: `Provide a brief description and basic care needs for a ${plantName}. Respond in ${language}.`,
     config: {
       responseMimeType: 'application/json',
-      responseSchema: responseSchema,
+      responseSchema,
     }
   });
 
   let plantData;
   try {
-    plantData = parseJsonFromMarkdown<{ name: string; description: string; careNeeds: string; }>(textResponse.text);
+    plantData = parseJsonFromMarkdown<{ name: string; description: string; careNeeds: string }>(textResponse.text);
   } catch (e) {
     console.error("Failed to parse plant search JSON:", e);
     throw new Error("Could not find information for the specified plant. Please try again.");
@@ -130,9 +116,8 @@ export const searchPlantByName = async (
   return { ...plantData, imageUrl };
 };
 
-// Function to generate a detailed care plan
 export const generateDetailedCarePlan = async (plant: Plant, language: string): Promise<string> => {
-  const prompt = `Create a detailed care plan for a ${plant.name}. 
+  const prompt = `Create a detailed care plan for a ${plant.name}.
     Cover the following topics in detail:
     - Watering schedule and techniques
     - Sunlight requirements (direct vs. indirect, hours per day)
@@ -141,7 +126,7 @@ export const generateDetailedCarePlan = async (plant: Plant, language: string): 
     - Common pests and diseases to watch for
     - Pruning tips
     - Repotting advice
-    
+
     Format the response as Markdown. Use headings for each section. Respond in ${language}.`;
 
   const response = await ai.models.generateContent({
@@ -153,52 +138,96 @@ export const generateDetailedCarePlan = async (plant: Plant, language: string): 
   return marked(markdown) as string;
 };
 
-// Function to generate a to-do list for plant care
-export const generateToDoList = async (
-  plants: Plant[],
-  coords: Coords,
-  weather: WeatherInfo,
-  language: string
-): Promise<CareTask[]> => {
-  if (plants.length === 0) {
-    return [];
+// ============================================
+// Annual Careplan Generation
+// ============================================
+
+interface AnnualTask {
+  task: string;
+  reason: string;
+  category: string;
+  taskNature: string;
+  scheduledMonth: number;
+  windowStart: string; // YYYY-MM-DD
+  windowEnd: string;   // YYYY-MM-DD
+  priority: string;
+}
+
+export const generateAnnualCareplan = async (
+  plant: Plant,
+  coords?: Coords | null,
+  weather?: WeatherInfo | null,
+  language: string = 'en'
+): Promise<AnnualTask[]> => {
+  const now = new Date();
+  const year = now.getFullYear();
+
+  let locationContext = '';
+  if (coords) {
+    locationContext = `User location: Latitude ${coords.latitude}, Longitude ${coords.longitude}. Determine the climate zone from these coordinates.`;
+  } else if (plant.latitude && plant.longitude) {
+    locationContext = `Plant location: Latitude ${plant.latitude}, Longitude ${plant.longitude}. Determine the climate zone from these coordinates.`;
+  } else {
+    locationContext = `No coordinates available. Assume a temperate Mediterranean climate (USDA zone 8-9).`;
   }
-  const plantList = plants.map(p => `- ${p.name}: ${p.careNeeds}`).join('\n');
+
+  let weatherContext = '';
+  if (weather) {
+    weatherContext = `Current weather: ${weather.temperature}°C, ${weather.condition}.`;
+  }
 
   const prompt = `
-    Based on the following list of plants, their basic care needs, the user's location, and the current weather, generate a JSON array of care tasks for the upcoming week.
-    
-    Current Date: ${new Date().toDateString()}
-    Location: Latitude ${coords.latitude}, Longitude ${coords.longitude}
-    Current Weather: ${weather.temperature}°C, ${weather.condition}.
-    
-    Plants:
-    ${plantList}
-    
-    Consider the weather and general plant care schedules.
-    - Generate tasks that should have been done in the last couple of days as "Overdue".
-    - Generate urgent tasks for today as "Today".
-    - Generate routine tasks for the next 7 days as "This Week".
-    
-    Each task object in the JSON array must have five properties: "plantName", "task" (a short action, e.g., "Water", "Prune"), "reason" (a brief explanation), "timing" (a string: "Overdue", "Today", or "This Week"), and "category" (a string: "pruning", "grafting", "watering", or "general").
-    
-    Proactively identify if any plant needs pruning or if it's the right season for grafting.
-    
-    Respond in ${language}. Respond ONLY with the JSON array.
-    `;
+You are an expert horticulturist. Generate a STRUCTURAL annual care plan for the year ${year} for the following plant.
+
+Plant: ${plant.name}
+Description: ${plant.description}
+Care needs: ${plant.careNeeds}
+${plant.notes ? `User notes: ${plant.notes}` : ''}
+${locationContext}
+${weatherContext}
+
+Generate 15-30 STRUCTURAL tasks distributed across all 12 months. These are time-sensitive tasks with precise optimal windows.
+
+Categories to use:
+- "pruning" - Pruning (structural, with window)
+- "grafting" - Grafting (structural, tight window)
+- "seeding" - Seeding (structural)
+- "fertilizing" - Fertilization (periodic)
+- "harvesting" - Harvest (seasonal)
+- "pest_prevention" - Disease/pest prevention (seasonal)
+- "repotting" - Repotting/soil care
+- "general" - Other structural care
+
+DO NOT generate routine watering tasks. Those will be generated separately based on real-time weather.
+
+Each task must have:
+- "task": short action description
+- "reason": brief explanation of why and when
+- "category": one of the categories above
+- "taskNature": always "structural" for this function
+- "scheduledMonth": integer 1-12
+- "windowStart": "YYYY-MM-DD" start of optimal window
+- "windowEnd": "YYYY-MM-DD" end of optimal window
+- "priority": "urgent" | "normal" | "low"
+
+Respond in ${language}. Respond ONLY with a JSON array of task objects.
+`;
 
   const responseSchema = {
     type: Type.ARRAY,
     items: {
       type: Type.OBJECT,
       properties: {
-        plantName: { type: Type.STRING, description: "The name of the plant." },
-        task: { type: Type.STRING, description: "The care task to be performed." },
-        reason: { type: Type.STRING, description: "The reason for the task." },
-        timing: { type: Type.STRING, enum: ['Overdue', 'Today', 'This Week'], description: "The urgency of the task." },
-        category: { type: Type.STRING, enum: ['pruning', 'grafting', 'watering', 'general'], description: "The category of the task." },
+        task: { type: Type.STRING },
+        reason: { type: Type.STRING },
+        category: { type: Type.STRING },
+        taskNature: { type: Type.STRING },
+        scheduledMonth: { type: Type.INTEGER },
+        windowStart: { type: Type.STRING },
+        windowEnd: { type: Type.STRING },
+        priority: { type: Type.STRING },
       },
-      required: ['plantName', 'task', 'reason', 'timing', 'category'],
+      required: ['task', 'reason', 'category', 'taskNature', 'scheduledMonth', 'windowStart', 'windowEnd', 'priority'],
     },
   };
 
@@ -207,20 +236,176 @@ export const generateToDoList = async (
     contents: prompt,
     config: {
       responseMimeType: 'application/json',
-      responseSchema: responseSchema,
+      responseSchema,
     },
   });
 
   try {
-    return parseJsonFromMarkdown<CareTask[]>(response.text);
+    return parseJsonFromMarkdown<AnnualTask[]>(response.text);
   } catch (e) {
-    console.error("Failed to parse to-do list JSON:", e);
-    // Return an empty array on parsing failure
+    console.error("Failed to parse annual careplan JSON:", e);
     return [];
   }
 };
 
-// Function for conversational AI chat with Botanica
+// ============================================
+// Biweekly Adaptation
+// ============================================
+
+interface AdaptationResult {
+  newTasks: Array<{
+    plantId: string;
+    plantName: string;
+    task: string;
+    reason: string;
+    category: string;
+    taskNature: string;
+    scheduledMonth: number;
+    windowStart: string;
+    windowEnd: string;
+    priority: string;
+  }>;
+  modifications: Array<{
+    taskId: string;
+    newWindowStart?: string;
+    newWindowEnd?: string;
+    newPriority?: string;
+  }>;
+}
+
+export const adaptBiweeklyTasks = async (
+  plants: Plant[],
+  pendingTasks: PersistentTask[],
+  completedHistory: PersistentTask[],
+  coords?: Coords | null,
+  weather?: WeatherInfo | null,
+  language: string = 'en'
+): Promise<AdaptationResult> => {
+  if (plants.length === 0) return { newTasks: [], modifications: [] };
+
+  const now = new Date();
+  const plantList = plants.map(p => `- ${p.name} (ID: ${p.id}): ${p.careNeeds}${p.notes ? ` | Notes: ${p.notes}` : ''}`).join('\n');
+
+  const pendingList = pendingTasks.map(t =>
+    `- [${t.id}] ${t.plantName}: "${t.task}" (${t.category}, ${t.taskNature}) window: ${t.windowStart || 'none'} to ${t.windowEnd || 'none'}, priority: ${t.priority}`
+  ).join('\n');
+
+  const completedList = completedHistory.slice(0, 30).map(t =>
+    `- ${t.plantName}: "${t.task}" completed ${t.completedAt ? new Date(t.completedAt).toLocaleDateString() : 'recently'}${t.userNotes ? ` (notes: ${t.userNotes})` : ''}`
+  ).join('\n');
+
+  let locationContext = '';
+  if (coords) {
+    locationContext = `Location: Lat ${coords.latitude}, Lon ${coords.longitude}.`;
+  } else {
+    const plantWithCoords = plants.find(p => p.latitude && p.longitude);
+    if (plantWithCoords) {
+      locationContext = `Location (from plant): Lat ${plantWithCoords.latitude}, Lon ${plantWithCoords.longitude}.`;
+    } else {
+      locationContext = `No location. Assume temperate Mediterranean climate.`;
+    }
+  }
+
+  const prompt = `
+You are an expert horticulturist performing a biweekly adaptation of care tasks.
+
+Current date: ${now.toISOString().split('T')[0]}
+${locationContext}
+${weather ? `Current weather: ${weather.temperature}°C, ${weather.condition}.` : 'Weather data unavailable.'}
+
+Plants:
+${plantList}
+
+Pending structural tasks (next 30 days):
+${pendingList || 'None'}
+
+Recently completed tasks:
+${completedList || 'None'}
+
+Your job:
+1. ROUTINE TASKS: Generate watering/checking tasks ONLY if weather conditions require it (e.g., no rain for 5+ days, extreme heat, frost warning). Each routine task needs a plant ID and name.
+2. STRUCTURAL ADJUSTMENTS: If weather conditions (frost, extreme heat, prolonged rain) affect pending structural tasks, suggest window modifications.
+3. NEVER re-propose tasks that are already completed.
+
+Respond with a JSON object with two arrays:
+- "newTasks": array of new tasks to create. Each with: plantId, plantName, task, reason, category, taskNature ("routine"), scheduledMonth, windowStart (YYYY-MM-DD), windowEnd (YYYY-MM-DD), priority
+- "modifications": array of modifications to existing tasks. Each with: taskId, newWindowStart (optional), newWindowEnd (optional), newPriority (optional)
+
+If nothing needs to change, return empty arrays. Respond in ${language}. Respond ONLY with JSON.
+`;
+
+  const responseSchema = {
+    type: Type.OBJECT,
+    properties: {
+      newTasks: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            plantId: { type: Type.STRING },
+            plantName: { type: Type.STRING },
+            task: { type: Type.STRING },
+            reason: { type: Type.STRING },
+            category: { type: Type.STRING },
+            taskNature: { type: Type.STRING },
+            scheduledMonth: { type: Type.INTEGER },
+            windowStart: { type: Type.STRING },
+            windowEnd: { type: Type.STRING },
+            priority: { type: Type.STRING },
+          },
+          required: ['plantId', 'plantName', 'task', 'reason', 'category', 'taskNature', 'scheduledMonth', 'windowStart', 'windowEnd', 'priority'],
+        },
+      },
+      modifications: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            taskId: { type: Type.STRING },
+            newWindowStart: { type: Type.STRING },
+            newWindowEnd: { type: Type.STRING },
+            newPriority: { type: Type.STRING },
+          },
+          required: ['taskId'],
+        },
+      },
+    },
+    required: ['newTasks', 'modifications'],
+  };
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+      responseSchema,
+    },
+  });
+
+  try {
+    return parseJsonFromMarkdown<AdaptationResult>(response.text);
+  } catch (e) {
+    console.error("Failed to parse biweekly adaptation JSON:", e);
+    return { newTasks: [], modifications: [] };
+  }
+};
+
+// ============================================
+// Legacy: generateToDoList (kept for reference)
+// ============================================
+export const generateToDoList = async (
+  plants: Plant[],
+  coords: Coords,
+  weather: WeatherInfo,
+  language: string
+): Promise<any[]> => {
+  // Legacy function - no longer used by the new persistent task system
+  return [];
+};
+
+// ============================================
+// Chat
+// ============================================
 export const chatWithBotanica = async (
   messages: { text: string; sender: 'user' | 'botanica' }[],
   plants: Plant[],
@@ -234,16 +419,16 @@ export const chatWithBotanica = async (
   const currentMessage = messages[messages.length - 1].text;
 
   const prompt = `
-    You are Anica, a friendly and expert AI garden assistant. 
+    You are Anica, a friendly and expert AI garden assistant.
     ${plantContext}
-    
+
     Conversation history:
     ${history}
-    
+
     Current User Message: ${currentMessage}
-    
+
     IMPORTANT: Respond in the language used by the user in their current message. If uncertain, default to ${language}.
-    Focus on plant care, identification, pests, pruning, and gardening tips. 
+    Focus on plant care, identification, pests, pruning, and gardening tips.
     Maintain a premium, supportive, and encouraging tone.
     Your name is Anica.
     `;

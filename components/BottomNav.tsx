@@ -44,6 +44,12 @@ export const BottomNav: React.FC = () => {
         onClick={() => navigate('/garden')}
       />
       <NavItem
+        icon="fa-solid fa-calendar-days"
+        label={t('calendarTab')}
+        isActive={path === '/calendar'}
+        onClick={() => navigate('/calendar')}
+      />
+      <NavItem
         icon="fa-solid fa-comment-dots"
         label={t('botanicaAdvisor')}
         isActive={path === '/chat'}

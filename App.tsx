@@ -4,6 +4,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { GardenScreen } from './screens/GardenScreen';
 import { AddPlantScreen } from './screens/AddPlantScreen';
 import { PlantDetailScreen } from './screens/PlantDetailScreen';
+import { CalendarScreen } from './screens/CalendarScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { ChatScreen } from './screens/ChatScreen';
 import { AuthScreen } from './screens/AuthScreen';
@@ -70,6 +71,7 @@ const AppContent: React.FC = () => {
         <Route path="/garden" element={<GardenScreen />} />
         <Route path="/garden/add" element={<AddPlantScreen />} />
         <Route path="/garden/:plantId" element={<PlantDetailScreen />} />
+        <Route path="/calendar" element={<CalendarScreen />} />
         <Route path="/chat" element={<ChatScreen />} />
         <Route path="/profile" element={<ProfileScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />

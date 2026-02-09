@@ -5,30 +5,25 @@ import { PlantStatus } from '../types';
 import { Spinner } from '../components/Spinner';
 import { useTranslation } from '../hooks/useTranslation';
 import { useCareplan } from '../hooks/useCareplan';
-import { useCompletedTasks } from '../hooks/useCompletedTasks';
 
 export const GardenScreen: React.FC = () => {
   const navigate = useNavigate();
   const { plants, isLoaded } = useGarden();
   const { t } = useTranslation();
   const { tasks, isLoading: isCareplanLoading } = useCareplan();
-  const { isTaskCompleted } = useCompletedTasks();
 
   const plantStatuses = useMemo(() => {
     const statuses: { [plantId: string]: PlantStatus } = {};
     if (isCareplanLoading || !tasks) return statuses;
 
-    const pendingTasksByPlant = new Set<string>();
-
+    // Group pending tasks by plantId
+    const pendingByPlant = new Set<string>();
     tasks.forEach(task => {
-      const taskId = `${task.plantName}-${task.task}`.replace(/\s+/g, '-');
-      if (!isTaskCompleted(taskId)) {
-        pendingTasksByPlant.add(task.plantName);
-      }
+      pendingByPlant.add(task.plantId);
     });
 
     plants.forEach(plant => {
-      if (pendingTasksByPlant.has(plant.name)) {
+      if (pendingByPlant.has(plant.id)) {
         statuses[plant.id] = 'needs_attention';
       } else {
         statuses[plant.id] = 'healthy';
@@ -36,8 +31,7 @@ export const GardenScreen: React.FC = () => {
     });
 
     return statuses;
-
-  }, [tasks, plants, isCareplanLoading, isTaskCompleted]);
+  }, [tasks, plants, isCareplanLoading]);
 
   if (!isLoaded) {
     return <Spinner text={t('loadingGarden')} />;

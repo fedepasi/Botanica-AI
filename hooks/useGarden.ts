@@ -17,7 +17,6 @@ export const useGarden = () => {
 
     try {
       const data = await supabaseService.getPlants(user.id);
-      // Data from Supabase already contains imageUrl (which should be the public URL or partial path)
       setPlants(data || []);
     } catch (error) {
       console.error("Failed to load garden from Supabase", error);
@@ -30,13 +29,8 @@ export const useGarden = () => {
     loadGarden();
   }, [loadGarden]);
 
-  const addPlant = useCallback(async (plantData: { name: string; description: string; careNeeds: string; imageUrl: string; latitude?: number; longitude?: number; }) => {
-    if (!user) return;
-
-    // Handle image upload if it's a blob/base64 (AddPlantScreen might pass a temporary URL)
-    // For now, assume AddPlantScreen handles the upload and passes the URL, 
-    // OR we handle it here. To keep useGarden clean, let's assume AddPlantScreen 
-    // provides a final URL or we handle the logic in AddPlantScreen.
+  const addPlant = useCallback(async (plantData: { name: string; description: string; careNeeds: string; imageUrl: string; latitude?: number; longitude?: number; }): Promise<string | undefined> => {
+    if (!user) return undefined;
 
     const newPlant: any = {
       name: plantData.name,
@@ -48,21 +42,21 @@ export const useGarden = () => {
       notes: '',
     };
 
-    await supabaseService.addPlant(newPlant, user.id);
+    const plantId = await supabaseService.addPlant(newPlant, user.id);
     await loadGarden();
+    return plantId;
   }, [user, loadGarden]);
 
   const removePlant = useCallback(async (plantId: string) => {
     if (!user) return;
+    // Delete all tasks for this plant first
+    await supabaseService.deleteTasksForPlant(plantId, user.id);
     await supabaseService.deletePlant(plantId, user.id);
     await loadGarden();
   }, [user, loadGarden]);
 
   const updatePlantNotes = useCallback(async (plantId: string, notes: string) => {
-    // Note: Update logic needs to be added to supabaseService
     if (!user) return;
-    // For now, simplicity: we'll implement update in service later if needed, 
-    // or just refresh here after local update if we had a proper update method.
     console.warn("Update plant notes not yet fully implemented in Supabase service");
   }, [user]);
 
