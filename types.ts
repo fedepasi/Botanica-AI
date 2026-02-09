@@ -89,18 +89,21 @@ export interface Coords {
   longitude: number;
 }
 
-export interface WeatherInfo {
-  temperature: number;
-  condition: string;
-  weatherCode: number;
-}
-
 export interface WeatherForecast {
   daily: {
     time: string[];
     temperature_2m_max: number[];
     temperature_2m_min: number[];
+    weather_code: number[];
+    precipitation_sum: number[];
   }
+}
+
+export interface WeatherInfo {
+  temperature: number;
+  condition: string;
+  weatherCode: number;
+  forecast?: WeatherForecast;
 }
 
 // Legacy type kept for backward compatibility during migration

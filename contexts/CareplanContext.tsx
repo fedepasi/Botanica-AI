@@ -93,36 +93,62 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const weatherRef = useRef<WeatherInfo | null>(null);
   const hasInitialized = useRef(false);
 
-  // Fetch weather (fire-and-forget)
+  // Fetch weather with 7-day forecast (fire-and-forget)
+  const fetchWeatherForCoords = useCallback(async (coords: Coords) => {
+    const weatherResponse = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum&forecast_days=7&timezone=auto`
+    );
+    if (!weatherResponse.ok) return;
+
+    const weatherData = await weatherResponse.json();
+    const current = weatherData.current;
+    const weatherInfo: WeatherInfo = {
+      temperature: Math.round(current.temperature_2m),
+      condition: getWeatherCondition(current.weather_code),
+      weatherCode: current.weather_code,
+      forecast: weatherData.daily ? {
+        daily: {
+          time: weatherData.daily.time,
+          temperature_2m_max: weatherData.daily.temperature_2m_max,
+          temperature_2m_min: weatherData.daily.temperature_2m_min,
+          weather_code: weatherData.daily.weather_code,
+          precipitation_sum: weatherData.daily.precipitation_sum,
+        }
+      } : undefined,
+    };
+    setWeather(weatherInfo);
+    weatherRef.current = weatherInfo;
+    coordsRef.current = coords;
+  }, []);
+
   const fetchWeather = useCallback(async () => {
+    // Try user geolocation first
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
       });
-      const coords: Coords = {
+      await fetchWeatherForCoords({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-      };
-      coordsRef.current = coords;
-
-      const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,weather_code`
-      );
-      if (!weatherResponse.ok) return;
-
-      const weatherData = await weatherResponse.json();
-      const current = weatherData.current;
-      const weatherInfo: WeatherInfo = {
-        temperature: Math.round(current.temperature_2m),
-        condition: getWeatherCondition(current.weather_code),
-        weatherCode: current.weather_code,
-      };
-      setWeather(weatherInfo);
-      weatherRef.current = weatherInfo;
+      });
+      return;
     } catch (e) {
-      console.warn('Could not get location or weather:', e);
+      console.warn('Geolocation failed, falling back to plant coordinates:', e);
     }
-  }, []);
+
+    // Fallback: use first plant with coordinates
+    const plantWithCoords = plants.find(p => p.latitude && p.longitude);
+    if (plantWithCoords) {
+      try {
+        await fetchWeatherForCoords({
+          latitude: plantWithCoords.latitude!,
+          longitude: plantWithCoords.longitude!,
+        });
+      } catch (e) {
+        console.warn('Could not fetch weather from plant coordinates:', e);
+      }
+    }
+  }, [plants, fetchWeatherForCoords]);
 
   // Load persistent tasks from DB
   const loadTasks = useCallback(async () => {

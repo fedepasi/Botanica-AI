@@ -10,6 +10,42 @@ const languageNames: Record<string, string> = {
 };
 const getLanguageName = (code: string): string => languageNames[code] || code;
 
+const getWeatherConditionLabel = (code: number): string => {
+  const conditions: Record<number, string> = {
+    0: 'Clear', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+    45: 'Fog', 48: 'Rime fog', 51: 'Light drizzle', 53: 'Drizzle', 55: 'Dense drizzle',
+    56: 'Freezing drizzle', 57: 'Heavy freezing drizzle',
+    61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
+    66: 'Freezing rain', 67: 'Heavy freezing rain',
+    71: 'Light snow', 73: 'Snow', 75: 'Heavy snow', 77: 'Snow grains',
+    80: 'Light showers', 81: 'Showers', 82: 'Heavy showers',
+    85: 'Light snow showers', 86: 'Heavy snow showers',
+    95: 'Thunderstorm', 96: 'Thunderstorm + hail', 99: 'Thunderstorm + heavy hail',
+  };
+  return conditions[code] || 'Unknown';
+};
+
+const formatForecastContext = (weather: WeatherInfo | null | undefined): string => {
+  if (!weather) return 'Weather data unavailable.';
+
+  let ctx = `Current weather: ${weather.temperature}°C, ${weather.condition}.`;
+
+  if (weather.forecast?.daily) {
+    const { time, temperature_2m_max, temperature_2m_min, weather_code, precipitation_sum } = weather.forecast.daily;
+    ctx += `\n\n7-day forecast:`;
+    for (let i = 0; i < time.length; i++) {
+      const minT = Math.round(temperature_2m_min[i]);
+      const maxT = Math.round(temperature_2m_max[i]);
+      const cond = getWeatherConditionLabel(weather_code[i]);
+      const rain = precipitation_sum[i];
+      const frost = minT <= 0 ? ' ⚠️ FROST RISK' : '';
+      ctx += `\n- ${time[i]}: ${minT}°C / ${maxT}°C, ${cond}, ${rain}mm rain${frost}`;
+    }
+  }
+
+  return ctx;
+};
+
 const parseJsonFromMarkdown = <T>(markdownString: string): T => {
   const jsonRegex = /```json\s*([\s\S]*?)\s*```/;
   const match = markdownString.match(jsonRegex);
@@ -177,10 +213,7 @@ export const generateAnnualCareplan = async (
     locationContext = `No coordinates available. Assume a temperate Mediterranean climate (USDA zone 8-9).`;
   }
 
-  let weatherContext = '';
-  if (weather) {
-    weatherContext = `Current weather: ${weather.temperature}°C, ${weather.condition}.`;
-  }
+  const weatherContext = formatForecastContext(weather);
 
   const langName = getLanguageName(language);
 
@@ -325,7 +358,7 @@ You are an expert horticulturist performing a biweekly adaptation of care tasks.
 
 Current date: ${now.toISOString().split('T')[0]}
 ${locationContext}
-${weather ? `Current weather: ${weather.temperature}°C, ${weather.condition}.` : 'Weather data unavailable.'}
+${formatForecastContext(weather)}
 
 Plants:
 ${plantList}
@@ -337,8 +370,9 @@ Recently completed tasks:
 ${completedList || 'None'}
 
 Your job:
-1. ROUTINE TASKS: Generate watering/checking tasks ONLY if weather conditions require it (e.g., no rain for 5+ days, extreme heat, frost warning). Each routine task needs a plant ID and name.
-2. STRUCTURAL ADJUSTMENTS: If weather conditions (frost, extreme heat, prolonged rain) affect pending structural tasks, suggest window modifications.
+1. ROUTINE TASKS: Generate watering/checking tasks ONLY if weather conditions require it. Use the 7-day forecast to anticipate needs (e.g., no rain coming → water now, frost in forecast → protect sensitive plants, heat wave → increase watering).
+2. STRUCTURAL ADJUSTMENTS: If the forecast shows frost, extreme heat, or prolonged rain that affects pending structural tasks, suggest postponing or advancing their windows.
+3. FROST PROTECTION: If the forecast shows temperatures below 0°C, generate urgent protection tasks for frost-sensitive plants.
 3. NEVER re-propose tasks that are already completed.
 
 Respond with a JSON object with two arrays:
