@@ -146,7 +146,7 @@ const PlantCalendar: React.FC<{ tasks: PersistentTask[] }> = ({ tasks }) => {
 
             {/* Task detail modal */}
             {selectedTask && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end justify-center" onClick={() => setSelectedTask(null)}>
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-end justify-center" onClick={() => setSelectedTask(null)}>
                     <div className="bg-white rounded-t-[32px] w-full max-w-lg p-6 pb-8" onClick={e => e.stopPropagation()}>
                         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
                         <div className="flex items-center space-x-2 mb-3">

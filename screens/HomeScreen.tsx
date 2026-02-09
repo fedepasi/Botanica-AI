@@ -130,7 +130,7 @@ const TaskItem: React.FC<{ task: DisplayTask; onComplete: (id: string, notes?: s
             </div>
 
             {showNotes && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end justify-center" onClick={() => setShowNotes(false)}>
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-end justify-center" onClick={() => setShowNotes(false)}>
                     <div className="bg-white rounded-t-[32px] w-full max-w-lg p-6 pb-8 animate-slide-up" onClick={e => e.stopPropagation()}>
                         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
                         <h3 className="font-black text-lg text-gray-900 mb-1">{task.task}</h3>
