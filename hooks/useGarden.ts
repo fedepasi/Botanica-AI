@@ -60,9 +60,15 @@ export const useGarden = () => {
     console.warn("Update plant notes not yet fully implemented in Supabase service");
   }, [user]);
 
+  const updatePlantImage = useCallback(async (plantId: string, imageUrl: string) => {
+    if (!user) return;
+    await supabaseService.updatePlantImage(plantId, user.id, imageUrl);
+    await loadGarden();
+  }, [user, loadGarden]);
+
   const plantExists = useCallback((plantName: string): boolean => {
     return plants.some(p => p.name.toLowerCase() === plantName.toLowerCase());
   }, [plants]);
 
-  return { plants, isLoaded, addPlant, removePlant, updatePlantNotes, plantExists, refreshGarden: loadGarden };
+  return { plants, isLoaded, addPlant, removePlant, updatePlantNotes, updatePlantImage, plantExists, refreshGarden: loadGarden };
 };

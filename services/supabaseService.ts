@@ -75,6 +75,15 @@ export const supabaseService = {
         return data.id;
     },
 
+    async updatePlantImage(plantId: string, userId: string, imageUrl: string) {
+        const { error } = await supabase
+            .from(getPrefixedTableName('plants'))
+            .update({ image_url: imageUrl })
+            .eq('id', plantId)
+            .eq('user_id', userId);
+        if (error) throw error;
+    },
+
     async deletePlant(plantId: string, userId: string) {
         const { error } = await supabase
             .from(getPrefixedTableName('plants'))

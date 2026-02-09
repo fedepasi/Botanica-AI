@@ -184,7 +184,7 @@ const PlantCalendar: React.FC<{ tasks: PersistentTask[] }> = ({ tasks }) => {
 export const PlantDetailScreen: React.FC = () => {
     const { plantId } = useParams<{ plantId: string }>();
     const navigate = useNavigate();
-    const { plants, isLoaded, removePlant, updatePlantNotes } = useGarden();
+    const { plants, isLoaded, removePlant, updatePlantNotes, updatePlantImage } = useGarden();
     const { language, t } = useTranslation();
     const { allTasksForCalendar, refreshTasks } = useCareplan();
 
@@ -194,6 +194,32 @@ export const PlantDetailScreen: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [notes, setNotes] = useState('');
     const [isSavingNotes, setIsSavingNotes] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !plant) return;
+
+        setIsUploadingImage(true);
+        try {
+            // Convert to base64
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64 = e.target?.result as string;
+                await updatePlantImage(plant.id, base64);
+                setIsUploadingImage(false);
+            };
+            reader.onerror = () => {
+                console.error('Failed to read file');
+                setIsUploadingImage(false);
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('Failed to upload image:', error);
+            setIsUploadingImage(false);
+        }
+    };
 
     // Get tasks for this specific plant
     const plantTasks = useMemo(() => {
@@ -273,6 +299,28 @@ export const PlantDetailScreen: React.FC = () => {
                         </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    
+                    {/* Change Photo Button */}
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                    />
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploadingImage}
+                        className="absolute top-4 right-4 w-14 h-14 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg hover:bg-white active:scale-95 transition-all border border-white/50"
+                        aria-label={t('changePhoto') || 'Change photo'}
+                    >
+                        {isUploadingImage ? (
+                            <i className="fa-solid fa-circle-notch animate-spin text-garden-green text-xl"></i>
+                        ) : (
+                            <i className="fa-solid fa-camera text-garden-green text-xl"></i>
+                        )}
+                    </button>
+                    
                     <div className="absolute bottom-6 left-6 right-6 text-white">
                         <h1 className="text-4xl font-black tracking-tight">{plant.name}</h1>
                         <p className="text-white/80 mt-1 font-medium italic">{plant.description}</p>
