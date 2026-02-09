@@ -5,12 +5,15 @@ import { AddPlantScreen } from './screens/AddPlantScreen';
 import { PlantDetailScreen } from './screens/PlantDetailScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { ChatScreen } from './screens/ChatScreen';
+import { AuthScreen } from './screens/AuthScreen';
 import { BottomNav } from './components/BottomNav';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { CareplanProvider } from './contexts/CareplanContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Plant, Screen } from './types';
 
 const AppContent: React.FC = () => {
+  const { user, loading } = useAuth();
   const [activeScreen, setActiveScreen] = useState<Screen>('home');
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
 
@@ -18,6 +21,18 @@ const AppContent: React.FC = () => {
     setSelectedPlant(plant);
     setActiveScreen('plantDetail');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <i className="fa-solid fa-leaf text-4xl text-green-600 animate-pulse"></i>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
 
   const renderScreen = () => {
     switch (activeScreen) {
@@ -38,28 +53,23 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const showBottomNav = !['addPlant', 'plantDetail'].includes(activeScreen);
-
   return (
-    <div className="font-sans bg-gray-50 min-h-screen">
-      <main className="container mx-auto max-w-lg">
-        {renderScreen()}
-      </main>
-      {showBottomNav && (
-        <BottomNav activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
-      )}
-    </div>
+    <main className="pb-20 min-h-screen bg-gray-50 font-outfit">
+      {renderScreen()}
+      <BottomNav activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
+    </main>
   );
-}
+};
 
-
-const App: React.FC = () => {
+export const App: React.FC = () => {
   return (
-    <LanguageProvider>
-      <CareplanProvider>
-        <AppContent />
-      </CareplanProvider>
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <CareplanProvider>
+          <AppContent />
+        </CareplanProvider>
+      </LanguageProvider>
+    </AuthProvider>
   );
 };
 

@@ -3,6 +3,8 @@ import { identifyPlant, searchPlantByName } from '../services/geminiService';
 import { Spinner } from '../components/Spinner';
 import { useGarden } from '../hooks/useGarden';
 import { useTranslation } from '../hooks/useTranslation';
+import { useAuth } from '../contexts/AuthContext';
+import { supabaseService } from '../services/supabaseService';
 
 interface AddPlantScreenProps {
   onBack: () => void;
@@ -128,13 +130,35 @@ export const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ onBack, onPlantA
   }
 
   const handleAddPlant = async () => {
-    if (resultData) {
-      await addPlant({
-        ...resultData,
-        latitude: coordinates?.lat,
-        longitude: coordinates?.lng
-      });
-      onPlantAdded();
+    if (resultData && user) {
+      setIsLoading(true);
+      setError(null);
+      try {
+        let finalImageUrl = resultData.imageUrl;
+
+        // If it's a base64 from capture, upload it
+        if (resultData.imageUrl.startsWith('data:')) {
+          const response = await fetch(resultData.imageUrl);
+          const blob = await response.blob();
+          const fileName = `plant_${user.id}_${Date.now()}.jpeg`;
+          await supabaseService.uploadPlantImage(blob, fileName, user.id);
+          finalImageUrl = supabaseService.getPublicImageUrl(`${user.id}/${fileName}`);
+        }
+
+        await addPlant({
+          ...resultData,
+          imageUrl: finalImageUrl,
+          latitude: coordinates?.lat,
+          longitude: coordinates?.lng
+        });
+        onPlantAdded();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t("failedToAddPlant"));
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (!user) {
+      setError(t("errorUserNotLoggedIn"));
     }
   };
 
