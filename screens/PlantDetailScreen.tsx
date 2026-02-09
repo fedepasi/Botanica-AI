@@ -149,8 +149,8 @@ const PlantCalendar: React.FC<{ tasks: PersistentTask[] }> = ({ tasks }) => {
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-start justify-center pt-16 overflow-y-auto" onClick={() => setSelectedTask(null)}>
                     <div className="bg-white rounded-[32px] w-full max-w-lg mx-4 p-6 mb-8 shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-end mb-2">
-                            <button onClick={() => setSelectedTask(null)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                                <i className="fa-solid fa-xmark text-gray-500"></i>
+                            <button onClick={() => setSelectedTask(null)} className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors">
+                                <i className="fa-solid fa-xmark text-gray-600 text-lg"></i>
                             </button>
                         </div>
                         <div className="flex items-center space-x-2 mb-3">

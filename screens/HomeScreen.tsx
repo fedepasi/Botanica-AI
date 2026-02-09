@@ -106,7 +106,7 @@ const TaskItem: React.FC<{ task: DisplayTask; onComplete: (id: string, notes?: s
             >
                 <div
                     onClick={handleQuickComplete}
-                    className="mr-4 mt-1 flex-shrink-0 w-8 h-8 rounded-2xl border-2 flex items-center justify-center transition-all border-gray-200 hover:border-garden-green hover:bg-garden-green/10"
+                    className="mr-4 flex-shrink-0 w-12 h-12 rounded-2xl border-2 flex items-center justify-center transition-all border-gray-200 hover:border-garden-green hover:bg-garden-green/10 active:bg-garden-green/20"
                 >
                     <i className={`fa-solid ${catInfo.icon} ${catInfo.color} text-sm opacity-60`}></i>
                 </div>
@@ -133,8 +133,8 @@ const TaskItem: React.FC<{ task: DisplayTask; onComplete: (id: string, notes?: s
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-start justify-center pt-16 overflow-y-auto" onClick={() => setShowNotes(false)}>
                     <div className="bg-white rounded-[32px] w-full max-w-lg mx-4 p-6 mb-8 shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-end mb-2">
-                            <button onClick={() => setShowNotes(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                                <i className="fa-solid fa-xmark text-gray-500"></i>
+                            <button onClick={() => setShowNotes(false)} className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors">
+                                <i className="fa-solid fa-xmark text-gray-600 text-lg"></i>
                             </button>
                         </div>
                         <h3 className="font-black text-lg text-gray-900 mb-1">{task.task}</h3>

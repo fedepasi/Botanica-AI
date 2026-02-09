@@ -167,9 +167,9 @@ export const CalendarScreen: React.FC = () => {
                 <div className="mb-6 flex flex-wrap gap-2">
                     <button
                         onClick={() => setFilterPlant('all')}
-                        className={`px-4 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all ${filterPlant === 'all'
+                        className={`px-5 py-3 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all min-h-[48px] ${filterPlant === 'all'
                                 ? 'bg-garden-green text-white shadow-lg shadow-garden-green/20'
-                                : 'bg-white text-gray-600 border border-gray-200 hover:border-garden-green/30'
+                                : 'bg-white text-gray-600 border border-gray-200 hover:border-garden-green/30 active:bg-gray-50'
                             }`}
                     >
                         {t('allPlants') || 'All'}
@@ -178,9 +178,9 @@ export const CalendarScreen: React.FC = () => {
                         <button
                             key={p.id}
                             onClick={() => setFilterPlant(p.id)}
-                            className={`px-4 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all ${filterPlant === p.id
+                            className={`px-5 py-3 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all min-h-[48px] ${filterPlant === p.id
                                     ? 'bg-garden-green text-white shadow-lg shadow-garden-green/20'
-                                    : 'bg-white text-gray-600 border border-gray-200 hover:border-garden-green/30'
+                                    : 'bg-white text-gray-600 border border-gray-200 hover:border-garden-green/30 active:bg-gray-50'
                                 }`}
                         >
                             {p.name}
@@ -269,8 +269,8 @@ export const CalendarScreen: React.FC = () => {
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-start justify-center pt-16 overflow-y-auto" onClick={() => setSelectedTask(null)}>
                     <div className="bg-white rounded-[32px] w-full max-w-lg mx-4 p-6 mb-8 shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-end mb-2">
-                            <button onClick={() => setSelectedTask(null)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                                <i className="fa-solid fa-xmark text-gray-500"></i>
+                            <button onClick={() => setSelectedTask(null)} className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors">
+                                <i className="fa-solid fa-xmark text-gray-600 text-lg"></i>
                             </button>
                         </div>
                         <div className="flex items-center space-x-3 mb-4">
