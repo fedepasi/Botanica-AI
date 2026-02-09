@@ -166,7 +166,11 @@ export const HomeScreen: React.FC = () => {
     const thisMonthTasks = useMemo(() => tasks.filter(t => t.timing === 'this_month'), [tasks]);
 
     const adviceTasks = useMemo(() => {
-        return tasks.filter(t => t.category === 'pruning' || t.category === 'grafting');
+        // Exclude overdue tasks - they're shown in the Overdue section
+        return tasks.filter(t => 
+            (t.category === 'pruning' || t.category === 'grafting') && 
+            t.timing !== 'overdue'
+        );
     }, [tasks]);
 
     const regularTasks = useMemo(() => {
