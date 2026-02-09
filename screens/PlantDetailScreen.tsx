@@ -182,7 +182,7 @@ export const PlantDetailScreen: React.FC = () => {
     const navigate = useNavigate();
     const { plants, isLoaded, removePlant, updatePlantNotes } = useGarden();
     const { language, t } = useTranslation();
-    const { allTasksForCalendar } = useCareplan();
+    const { allTasksForCalendar, refreshTasks } = useCareplan();
 
     const plant = plants.find(p => p.id === plantId);
 
@@ -234,9 +234,10 @@ export const PlantDetailScreen: React.FC = () => {
         );
     }
 
-    const handleRemovePlant = () => {
+    const handleRemovePlant = async () => {
         if (window.confirm(`${t('confirmRemovePlant')} ${plant.name}?`)) {
-            removePlant(plant.id);
+            await removePlant(plant.id);
+            await refreshTasks();
             navigate('/garden');
         }
     };
