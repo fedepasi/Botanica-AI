@@ -61,6 +61,18 @@ All Supabase resources prefixed with `botanica_`:
 - Tables: `botanica_plants`, `botanica_tasks`, etc.
 - Storage buckets: `botanica_images`
 
+## 🔔 Push Notifications (TODO)
+
+**Stack scelto:** Supabase + Vercel + Firebase Cloud Messaging (FCM)
+
+Implementazione futura:
+1. Creare progetto Firebase Console
+2. Aggiungere Service Worker per push
+3. Salvare subscription tokens in `botanica_subscriptions`
+4. Trigger notifiche da Supabase Edge Function
+
+**Costo: $0** (FCM è gratuito e illimitato)
+
 ## 📁 Project Structure
 
 ```
