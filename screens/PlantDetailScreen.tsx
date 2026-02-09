@@ -146,9 +146,13 @@ const PlantCalendar: React.FC<{ tasks: PersistentTask[] }> = ({ tasks }) => {
 
             {/* Task detail modal */}
             {selectedTask && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-end justify-center" onClick={() => setSelectedTask(null)}>
-                    <div className="bg-white rounded-t-[32px] w-full max-w-lg p-6 pb-8" onClick={e => e.stopPropagation()}>
-                        <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-start justify-center pt-16 overflow-y-auto" onClick={() => setSelectedTask(null)}>
+                    <div className="bg-white rounded-[32px] w-full max-w-lg mx-4 p-6 mb-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-end mb-2">
+                            <button onClick={() => setSelectedTask(null)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                                <i className="fa-solid fa-xmark text-gray-500"></i>
+                            </button>
+                        </div>
                         <div className="flex items-center space-x-2 mb-3">
                             <div className={`w-3 h-3 rounded-full ${CATEGORY_COLORS[selectedTask.category]}`}></div>
                             <span className="text-xs font-bold uppercase tracking-widest text-gray-400">{getCategoryLabel(selectedTask.category, t)}</span>
