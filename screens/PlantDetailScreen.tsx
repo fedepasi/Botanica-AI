@@ -40,70 +40,87 @@ export const PlantDetailScreen: React.FC<PlantDetailScreenProps> = ({ plant, onB
     setIsSavingNotes(true);
     updatePlantNotes(plant.id, notes);
     setTimeout(() => {
-        setIsSavingNotes(false);
+      setIsSavingNotes(false);
     }, 1500);
   };
 
   return (
-    <div className="p-4 pb-20">
-      <button onClick={onBack} className="flex items-center text-green-600 font-semibold mb-4">
-        <i className="fa-solid fa-arrow-left mr-2"></i>
+    <div className="p-6 pb-24 font-outfit min-h-screen bg-garden-beige">
+      <button onClick={onBack} className="flex items-center text-garden-green font-bold mb-6 hover:translate-x-[-4px] transition-transform">
+        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-3 shadow-sm border border-gray-100">
+          <i className="fa-solid fa-arrow-left text-sm"></i>
+        </div>
         {t('backToGarden')}
       </button>
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <img src={plant.imageUrl} alt={plant.name} className="w-full h-56 object-cover" />
-        <div className="p-6">
-          <h1 className="text-3xl font-bold text-green-800">{plant.name}</h1>
-          <p className="text-gray-600 mt-2">{plant.description}</p>
-          <div className="mt-4 bg-green-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-green-800">{t('basicCare')}</h3>
-            <p className="text-sm text-green-700 mt-1">{plant.careNeeds}</p>
+      <div className="bg-white rounded-[48px] shadow-sm border border-gray-100 overflow-hidden mb-6">
+        <div className="relative h-72">
+          <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+          <div className="absolute bottom-6 left-6 right-6 text-white">
+            <h1 className="text-4xl font-black tracking-tight">{plant.name}</h1>
+            <p className="text-white/80 mt-1 font-medium italic">{plant.description}</p>
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('detailedCarePlan')}</h2>
-          {isLoading ? (
-            <Spinner text={t('generatingPlan')} />
-          ) : (
-            <div
-              className="prose prose-green max-w-none"
-              dangerouslySetInnerHTML={{ __html: carePlan }}
-            />
-          )}
-        </div>
+        <div className="p-8">
+          <div className="bg-garden-beige/50 p-6 rounded-3xl border border-garden-green/10 mb-10">
+            <h3 className="font-black text-garden-green text-xs uppercase tracking-[0.2em] mb-2">{t('basicCare')}</h3>
+            <p className="text-gray-700 font-medium leading-relaxed">{plant.careNeeds}</p>
+          </div>
 
-        <div className="px-6 py-4 border-t border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('myNotes')}</h2>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder={t('notesPlaceholder')}
-            className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
-            aria-label={t('myNotes')}
-          />
-          <button
-            onClick={handleSaveNotes}
-            className={`w-full mt-3 py-2 text-white font-bold rounded-lg shadow-md transition-colors ${isSavingNotes ? 'bg-green-500' : 'bg-blue-500 hover:bg-blue-600'}`}
-            disabled={isSavingNotes}
-          >
-            {isSavingNotes ? (
-              <><i className="fa-solid fa-check mr-2"></i>{t('notesSaved')}</>
+          <div className="mb-10">
+            <h2 className="text-2xl font-black text-gray-900 mb-6 tracking-tight">
+              <span className="highlight-yellow inline-block">{t('detailedCarePlan')}</span>
+            </h2>
+            {isLoading ? (
+              <div className="py-10">
+                <Spinner text={t('generatingPlan')} />
+              </div>
             ) : (
-              <><i className="fa-solid fa-save mr-2"></i>{t('saveNotes')}</>
+              <div
+                className="prose prose-green max-w-none text-gray-600 font-medium leading-loose"
+                dangerouslySetInnerHTML={{ __html: carePlan }}
+              />
             )}
-          </button>
-        </div>
-        
-        <div className="p-6 bg-gray-50 border-t border-gray-200">
+          </div>
+
+          <div className="mb-10 pt-6 border-t border-gray-50">
+            <h2 className="text-2xl font-black text-gray-900 mb-6 tracking-tight">
+              <span className="highlight-yellow inline-block">{t('myNotes')}</span>
+            </h2>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder={t('notesPlaceholder')}
+              className="w-full h-40 p-5 bg-garden-beige/30 border-2 border-transparent rounded-[32px] focus:bg-white focus:border-garden-yellow focus:ring-0 transition-all font-medium text-gray-700 outline-none"
+              aria-label={t('myNotes')}
+            />
             <button
-                onClick={handleRemovePlant}
-                className="w-full py-3 bg-red-500 text-white font-bold rounded-lg shadow-md hover:bg-red-600 transition-colors"
+              onClick={handleSaveNotes}
+              className={`w-full mt-4 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center ${isSavingNotes
+                  ? 'bg-garden-green text-white scale-95'
+                  : 'bg-garden-yellow text-gray-900 shadow-lg shadow-garden-yellow/20 hover:scale-105 active:scale-95'
+                }`}
+              disabled={isSavingNotes}
             >
-                <i className="fa-solid fa-trash-can mr-2"></i>
-                {t('removeFromGarden')}
+              {isSavingNotes ? (
+                <><i className="fa-solid fa-check mr-2 text-sm"></i>{t('notesSaved')}</>
+              ) : (
+                <><i className="fa-solid fa-save mr-2 text-sm"></i>{t('saveNotes')}</>
+              )}
             </button>
+          </div>
+
+          <div className="pt-10 border-t border-gray-50">
+            <button
+              onClick={handleRemovePlant}
+              className="w-full py-4 text-red-500 font-bold rounded-2xl hover:bg-red-50 transition-all flex items-center justify-center border border-red-100"
+            >
+              <i className="fa-solid fa-trash-can mr-2"></i>
+              {t('removeFromGarden')}
+            </button>
+          </div>
         </div>
 
       </div>

@@ -54,7 +54,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <main className="pb-20 min-h-screen bg-gray-50 font-outfit">
+    <main className="pb-20 min-h-screen bg-garden-beige font-outfit">
       {renderScreen()}
       <BottomNav activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
     </main>

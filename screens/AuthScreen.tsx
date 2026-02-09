@@ -38,24 +38,28 @@ export const AuthScreen: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 font-outfit">
-            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-3xl shadow-xl border border-gray-100">
+        <div className="min-h-screen flex items-center justify-center bg-garden-beige px-4 py-12 sm:px-6 lg:px-8 font-outfit">
+            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-[48px] shadow-2xl shadow-garden-green/5 border border-gray-100">
                 <div className="text-center">
-                    <div className="w-20 h-20 bg-green-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                        <i className="fa-solid fa-seedling text-4xl text-green-600"></i>
+                    <div className="w-24 h-24 bg-garden-green rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-garden-green/20">
+                        <i className="fa-solid fa-seedling text-4xl text-white"></i>
                     </div>
-                    <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">
-                        {isSignUp ? 'Create Account' : 'Welcome Back'}
+                    <h2 className="text-4xl font-black text-gray-900 tracking-tight leading-tight">
+                        {isSignUp ? (
+                            <span>Create <span className="highlight-yellow inline-block">Account</span></span>
+                        ) : (
+                            <span>Welcome <span className="highlight-yellow inline-block">Back</span></span>
+                        )}
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600">
-                        {isSignUp ? 'Join the community of premium gardeners' : 'Sign in to manage your premium garden'}
+                    <p className="mt-4 text-gray-500 font-medium italic">
+                        {isSignUp ? t('joinCommunity') || 'Join the community of premium gardeners' : t('signInMessage') || 'Sign in to manage your premium garden'}
                     </p>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={handleAuth}>
+                <form className="mt-10 space-y-6" onSubmit={handleAuth}>
                     <div className="space-y-4">
                         <div>
-                            <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="email-address" className="block text-xs font-black uppercase tracking-widest text-garden-green mb-2 ml-2">
                                 Email address
                             </label>
                             <input
@@ -66,12 +70,12 @@ export const AuthScreen: React.FC = () => {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all sm:text-sm"
+                                className="appearance-none relative block w-full px-6 py-4 bg-garden-beige/30 border-2 border-transparent placeholder-gray-400 text-gray-900 rounded-2xl focus:outline-none focus:bg-white focus:border-garden-yellow transition-all font-medium"
                                 placeholder="you@example.com"
                             />
                         </div>
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="password" className="block text-xs font-black uppercase tracking-widest text-garden-green mb-2 ml-2">
                                 Password
                             </label>
                             <input
@@ -82,14 +86,14 @@ export const AuthScreen: React.FC = () => {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all sm:text-sm"
+                                className="appearance-none relative block w-full px-6 py-4 bg-garden-beige/30 border-2 border-transparent placeholder-gray-400 text-gray-900 rounded-2xl focus:outline-none focus:bg-white focus:border-garden-yellow transition-all font-medium"
                                 placeholder="••••••••"
                             />
                         </div>
                     </div>
 
                     {message && (
-                        <div className={`p-4 rounded-2xl text-sm font-medium ${message.type === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>
+                        <div className={`p-5 rounded-2xl text-sm font-bold animate-fade-in ${message.type === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-garden-green/10 text-garden-green border border-garden-green/10'}`}>
                             <div className="flex items-center">
                                 <i className={`fa-solid ${message.type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'} mr-3`}></i>
                                 {message.text}
@@ -101,7 +105,7 @@ export const AuthScreen: React.FC = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-2xl text-white transition-all transform hover:-translate-y-1 active:scale-95 ${loading ? 'bg-green-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 shadow-lg shadow-green-200'
+                            className={`group relative w-full flex justify-center py-5 px-4 border border-transparent text-sm font-black uppercase tracking-widest rounded-2xl text-white transition-all transform hover:-translate-y-1 active:scale-95 ${loading ? 'bg-garden-green/40 cursor-not-allowed' : 'bg-garden-green hover:bg-garden-green/90 shadow-xl shadow-garden-green/20'
                                 }`}
                         >
                             {loading ? (
@@ -113,10 +117,10 @@ export const AuthScreen: React.FC = () => {
                     </div>
                 </form>
 
-                <div className="text-center">
+                <div className="text-center pt-4">
                     <button
                         onClick={() => setIsSignUp(!isSignUp)}
-                        className="text-sm font-bold text-green-600 hover:text-green-500 transition-colors"
+                        className="text-xs font-black uppercase tracking-widest text-garden-green/60 hover:text-garden-green transition-colors"
                     >
                         {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
                     </button>

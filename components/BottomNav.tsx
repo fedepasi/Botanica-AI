@@ -15,11 +15,16 @@ const NavItem: React.FC<{
 }> = ({ icon, label, isActive, onClick }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center w-full pt-2 pb-1 transition-colors duration-200 ${isActive ? 'text-green-600' : 'text-gray-400 hover:text-green-500'
+    className={`flex flex-col items-center justify-center w-full pt-3 pb-2 transition-all duration-300 relative ${isActive ? 'text-garden-green scale-110' : 'text-gray-400 hover:text-garden-green/70'
       }`}
   >
-    <i className={`text-2xl ${icon}`}></i>
-    <span className="text-xs mt-1">{label}</span>
+    <div className="relative">
+      <i className={`text-xl ${icon}`}></i>
+      {isActive && (
+        <div className="absolute -top-1 -right-1 w-2 h-2 bg-garden-yellow rounded-full shadow-sm animate-pulse"></div>
+      )}
+    </div>
+    <span className={`text-[10px] mt-1 font-bold uppercase tracking-widest ${isActive ? 'opacity-100' : 'opacity-60'}`}>{label}</span>
   </button>
 );
 
@@ -27,7 +32,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeScreen, setActiveScr
   const { t } = useTranslation();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-16 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] flex justify-around items-center">
+    <div className="fixed bottom-0 left-0 right-0 h-20 bg-white shadow-[0_-5px_20px_rgba(0,0,0,0.05)] flex justify-around items-center px-4 rounded-t-[32px] border-t border-gray-100 z-50">
       <NavItem
         icon="fa-solid fa-house"
         label={t('home')}

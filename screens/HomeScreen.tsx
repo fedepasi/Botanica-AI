@@ -77,17 +77,33 @@ const TaskItem: React.FC<{ task: CareTask }> = ({ task }) => {
     return (
         <div
             onClick={() => toggleTaskCompletion(taskId)}
-            className={`flex items-start p-4 rounded-lg cursor-pointer transition-all duration-300 shadow-md ${isCompleted ? 'bg-green-100 text-gray-500' : 'bg-white hover:bg-gray-50'}`}
+            className={`flex items-start p-5 rounded-3xl cursor-pointer transition-all duration-300 border ${isCompleted
+                ? 'bg-gray-50 border-gray-100 text-gray-400 opacity-60'
+                : 'bg-white border-gray-100 hover:border-garden-green/30 hover:shadow-xl hover:shadow-garden-green/5'
+                }`}
         >
-            <div className={`mr-4 mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${isCompleted ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}>
-                {isCompleted ? <i className="fa-solid fa-check text-white text-sm"></i> : <i className={`fa-solid ${catInfo.icon} ${catInfo.color} text-xs`}></i>}
+            <div className={`mr-4 mt-1 flex-shrink-0 w-8 h-8 rounded-2xl border-2 flex items-center justify-center transition-all ${isCompleted
+                ? 'bg-garden-green border-garden-green'
+                : 'border-gray-200 group-hover:border-garden-green'
+                }`}>
+                {isCompleted ? (
+                    <i className="fa-solid fa-check text-white text-sm"></i>
+                ) : (
+                    <i className={`fa-solid ${catInfo.icon} ${catInfo.color} text-sm opacity-60`}></i>
+                )}
             </div>
             <div className="flex-grow">
-                <p className={`font-semibold ${isCompleted ? 'line-through' : 'text-gray-800'}`}>{task.task}: {task.plantName}</p>
-                <p className={`text-sm ${isCompleted ? 'line-through' : ''}`}>{task.reason}</p>
+                <p className={`font-bold text-lg ${isCompleted ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                    {task.task}
+                </p>
+                <div className="flex items-center mt-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-garden-green/70 mr-2">{task.plantName}</span>
+                    <span className="w-1 h-1 bg-gray-300 rounded-full mr-2"></span>
+                    <p className={`text-sm ${isCompleted ? 'line-through text-gray-400' : 'text-gray-500'}`}>{task.reason}</p>
+                </div>
             </div>
             {!isCompleted && (
-                <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${timingInfo.textColor} ${timingInfo.bgColor}`}>
+                <span className={`ml-2 px-3 py-1 text-[10px] font-black uppercase tracking-tighter rounded-xl whitespace-nowrap ${timingInfo.textColor} ${timingInfo.bgColor} border border-black/5 shadow-sm`}>
                     {timingInfo.label}
                 </span>
             )}
@@ -129,22 +145,26 @@ export const HomeScreen: React.FC = () => {
     const hasPlants = plants.length > 0;
 
     return (
-        <div className="p-4 pb-20">
-            <h1 className="text-4xl font-bold text-green-800 mb-2">{t('welcomeTitle')}</h1>
-            <p className="text-gray-500 mb-6">{t('welcomeMessage')}</p>
+        <div className="p-6 pb-24 font-outfit">
+            <div className="mb-10 pt-4">
+                <h1 className="text-5xl font-black text-gray-900 tracking-tight leading-tight">
+                    {t('welcomeTitle')}, <span className="highlight-yellow inline-block">{user.email?.split('@')[0]}</span>
+                </h1>
+                <p className="text-gray-500 mt-2 text-lg font-medium tracking-wide italic decoration-garden-yellow underline decoration-2 underline-offset-4">{t('welcomeMessage')}</p>
+            </div>
 
             {hasPlants && <WeatherDisplay />}
 
             {adviceTasks.length > 0 && (
-                <div className="mb-8 animate-fade-in">
-                    <div className="flex items-center space-x-2 mb-4">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                            <i className="fa-solid fa-wand-magic-sparkles text-green-600"></i>
+                <div className="mb-10 animate-fade-in group">
+                    <div className="bg-garden-green rounded-t-3xl p-5 flex items-center space-x-3 border-b-4 border-garden-yellow">
+                        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                            <i className="fa-solid fa-wand-magic-sparkles text-white text-xl"></i>
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-800">{t('botanicaAdvisor')}</h2>
+                        <h2 className="text-xl font-bold text-white uppercase tracking-widest">{t('botanicaAdvisor')}</h2>
                     </div>
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-1 rounded-xl shadow-inner">
-                        <div className="space-y-3 p-2">
+                    <div className="bg-white rounded-b-3xl p-4 shadow-2xl shadow-garden-green/5 border-x border-b border-gray-100">
+                        <div className="space-y-4">
                             {adviceTasks.map((task, index) => (
                                 <TaskItem key={`advice-${task.plantName}-${task.task}-${index}`} task={task} />
                             ))}
@@ -153,21 +173,26 @@ export const HomeScreen: React.FC = () => {
                 </div>
             )}
 
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('upcomingTasks')}</h2>
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 tracking-tight">{t('upcomingTasks')}</h2>
+                <div className="h-1 flex-grow mx-4 bg-gray-100 rounded-full"></div>
+            </div>
 
             {otherTasks.length > 0 || adviceTasks.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {otherTasks.map((task, index) => (
                         <TaskItem key={`${task.plantName}-${task.task}-${index}`} task={task} />
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-10 px-4 bg-white rounded-lg shadow-md">
-                    <i className="fa-solid fa-mug-saucer text-6xl text-gray-300 mb-4"></i>
-                    <h2 className="text-xl font-semibold text-gray-700">
+                <div className="text-center py-16 px-6 bg-white border border-dashed border-gray-200 rounded-[40px] shadow-sm">
+                    <div className="w-24 h-24 bg-garden-beige rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i className="fa-solid fa-mug-saucer text-5xl text-gray-300"></i>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800 tracking-tight">
                         {hasPlants ? t('noTasksToday') : t('noPlantsTitle')}
                     </h2>
-                    <p className="text-gray-500 mt-2">
+                    <p className="text-gray-500 mt-2 font-medium">
                         {hasPlants ? t('noTasksMessage') : t('noPlantsMessage')}
                     </p>
                 </div>
