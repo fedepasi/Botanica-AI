@@ -15,20 +15,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['icon.png'],
-        manifest: {
-          name: 'Botanica AI',
-          short_name: 'Botanica',
-          description: 'Your Proactive AI Orchard & Garden Companion',
-          theme_color: '#22c55e',
-          icons: [
-            {
-              src: 'icon.png',
-              sizes: '1024x1024',
-              type: 'image/png',
-              purpose: 'any maskable',
-            },
-          ],
-        },
+        manifest: false, // Use public/manifest.json instead
       })
     ],
     define: {

@@ -88,5 +88,8 @@
   "optimalWindow": "Optimal window",
   "addNotes": "Add notes about this task...",
   "allPlants": "All Plants",
-  "plantNotFound": "Plant not found"
+  "plantNotFound": "Plant not found",
+  "changePhoto": "Change Photo",
+  "email": "Email",
+  "signOut": "Sign Out"
 }

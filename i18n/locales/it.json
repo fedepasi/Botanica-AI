@@ -88,5 +88,8 @@
   "optimalWindow": "Finestra ottimale",
   "addNotes": "Aggiungi note su questa attivit\u00e0...",
   "allPlants": "Tutte le Piante",
-  "plantNotFound": "Pianta non trovata"
+  "plantNotFound": "Pianta non trovata",
+  "changePhoto": "Cambia Foto",
+  "email": "Email",
+  "signOut": "Esci"
 }

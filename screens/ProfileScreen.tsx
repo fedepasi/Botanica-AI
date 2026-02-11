@@ -89,7 +89,7 @@ export const ProfileScreen: React.FC = () => {
             <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-all">
               <i className="fa-solid fa-right-from-bracket text-red-500 text-xl"></i>
             </div>
-            <span className="font-black uppercase tracking-widest text-xs text-red-600">Sign Out</span>
+            <span className="font-black uppercase tracking-widest text-xs text-red-600">{t('signOut')}</span>
           </div>
           <i className="fa-solid fa-chevron-right text-red-200 group-hover:translate-x-1 transition-transform"></i>
         </button>

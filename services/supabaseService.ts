@@ -84,6 +84,15 @@ export const supabaseService = {
         if (error) throw error;
     },
 
+    async updatePlantNotes(plantId: string, userId: string, notes: string) {
+        const { error } = await supabase
+            .from(getPrefixedTableName('plants'))
+            .update({ notes })
+            .eq('id', plantId)
+            .eq('user_id', userId);
+        if (error) throw error;
+    },
+
     async deletePlant(plantId: string, userId: string) {
         const { error } = await supabase
             .from(getPrefixedTableName('plants'))

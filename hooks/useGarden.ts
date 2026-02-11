@@ -57,8 +57,9 @@ export const useGarden = () => {
 
   const updatePlantNotes = useCallback(async (plantId: string, notes: string) => {
     if (!user) return;
-    console.warn("Update plant notes not yet fully implemented in Supabase service");
-  }, [user]);
+    await supabaseService.updatePlantNotes(plantId, user.id, notes);
+    await loadGarden();
+  }, [user, loadGarden]);
 
   const updatePlantImage = useCallback(async (plantId: string, imageUrl: string) => {
     if (!user) return;
