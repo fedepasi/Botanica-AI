@@ -1,7 +1,8 @@
 {
-    "name": "Botanica AI",
+    "name": "Botanica AI — Il Tuo Orticoltore AI Personale",
     "short_name": "Botanica",
-    "description": "Your Proactive AI Orchard & Garden Companion",
+    "description": "Il primo AI orticoltore personale. Gestisci orto e frutteto con intelligenza artificiale, identifica piante, ricevi piani di cura.",
+    "lang": "it",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#f0fdf4",

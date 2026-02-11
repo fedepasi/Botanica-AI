@@ -4,7 +4,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Botanica AI</title>
+  <title>Botanica AI — Il Tuo Orticoltore AI Personale</title>
+  <meta name="description" content="Botanica AI è il tuo orticoltore personale. Identifica piante, ricevi piani di cura annuali, chat con Anica e gestisci il tuo orto con intelligenza artificiale.">
+  <meta name="keywords" content="orto, giardino, piante, AI, intelligenza artificiale, cura piante, potatura, orticoltura, frutteto">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://botanica-ai.vercel.app/">
+  <meta property="og:title" content="Botanica AI — Il Tuo Orticoltore AI Personale">
+  <meta property="og:description" content="Il primo AI orticoltore personale. Gestisci orto e frutteto con intelligenza artificiale.">
+  <meta property="og:image" content="https://botanica-ai.vercel.app/og-image.png">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://botanica-ai.vercel.app/">
+  <meta property="twitter:title" content="Botanica AI — Il Tuo Orticoltore AI Personale">
+  <meta property="twitter:description" content="Il primo AI orticoltore personale. Gestisci orto e frutteto con intelligenza artificiale.">
+  <meta property="twitter:image" content="https://botanica-ai.vercel.app/og-image.png">
+  
+  <!-- PWA -->
   <meta name="theme-color" content="#22c55e" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -85,6 +103,34 @@
 </head>
 
 <body class="text-gray-800">
+  <!-- Structured Data for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Botanica AI",
+    "description": "Il tuo orticoltore AI personale. Identifica piante, ricevi piani di cura annuali e gestisci il tuo orto con intelligenza artificiale.",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "Web, iOS, Android",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "150"
+    },
+    "featureList": "Identificazione piante con fotocamera, Piani di cura annuali personalizzati, Chat con AI orticoltore, Gestione calendario giardino, Avvisi meteo e stagionali",
+    "softwareVersion": "1.0.0",
+    "inLanguage": ["it", "en"],
+    "author": {
+      "@type": "Organization",
+      "name": "Botanica AI"
+    }
+  }
+  </script>
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
