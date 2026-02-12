@@ -171,6 +171,29 @@ const generateMarkdownFromCarePlan = (carePlan: any, langName: string): string =
   return markdown || "No care plan available.";
 };
 
+// Verify JWT token with Supabase
+const verifyJWT = async (token: string): Promise<{ valid: boolean; user?: any }> => {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'apikey': Deno.env.get('SUPABASE_ANON_KEY') || '',
+      },
+    });
+    
+    if (!response.ok) {
+      return { valid: false };
+    }
+    
+    const user = await response.json();
+    return { valid: true, user };
+  } catch (error) {
+    console.error('JWT verification error:', error);
+    return { valid: false };
+  }
+};
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -180,6 +203,19 @@ Deno.serve(async (req: Request) => {
     // DEBUG: Log auth header
     const authHeader = req.headers.get('Authorization');
     console.log('DEBUG: Auth header received:', authHeader ? 'Present' : 'Missing');
+    
+    // Verify JWT if present
+    let user = null;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const verification = await verifyJWT(token);
+      if (verification.valid) {
+        user = verification.user;
+        console.log('DEBUG: User authenticated:', user.id);
+      } else {
+        console.log('DEBUG: Invalid token, proceeding as anonymous');
+      }
+    }
     
     const apiKey = Deno.env.get("GEMINI_API_KEY");
     if (!apiKey) {
