@@ -10,11 +10,16 @@ const EDGE_FUNCTION_URL = import.meta.env.VITE_SUPABASE_EDGE_FUNCTION_URL ||
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 const callGeminiEdgeFunction = async (action: string, payload: Record<string, any>) => {
-  // Get current session to obtain JWT token
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  // Refresh session to ensure token is valid
+  const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
   
-  if (sessionError) {
-    console.error('Session error:', sessionError);
+  if (refreshError) {
+    console.error('Session refresh error:', refreshError);
+    // Try to get existing session even if refresh failed
+    const { data: { session: existingSession } } = await supabase.auth.getSession();
+    if (!existingSession?.access_token) {
+      throw new Error('Session expired. Please sign in again.');
+    }
   }
   
   // Try user token first, fallback to anon key for anonymous access
@@ -24,9 +29,6 @@ const callGeminiEdgeFunction = async (action: string, payload: Record<string, an
     console.warn('No user session, falling back to anon key');
     token = SUPABASE_ANON_KEY;
   }
-  
-  console.log('DEBUG: Token present:', !!token);
-  console.log('DEBUG: Token length:', token?.length);
   
   if (!token) {
     throw new Error('No authentication token available.');
