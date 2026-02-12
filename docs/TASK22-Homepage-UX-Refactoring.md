@@ -216,11 +216,11 @@ export const useGroupedTasks = () => {
 ## 📱 Wireframe Dettagliato
 
 ### Mobile View (principale)
-
+ 
 ```
 ┌─────────────────────────┐
 │  👤 Ciao, Federico!     │
-│  🌤️ 18°C | Soleggiato   │
+│  🌤️ 18°C | Soleggiato    │
 ├─────────────────────────┤
 │ 🔴 3 URGENTI             │
 │ • Melo: Potatura (-3gg) │
