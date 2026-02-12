@@ -7,13 +7,29 @@ const SUPABASE_PROJECT_REF = 'khkwrkmsikpsrkeiwvjm';
 const EDGE_FUNCTION_URL = import.meta.env.VITE_SUPABASE_EDGE_FUNCTION_URL || 
   `https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1`;
 
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
 const callGeminiEdgeFunction = async (action: string, payload: Record<string, any>) => {
   // Get current session to obtain JWT token
-  const { data: { session } } = await supabase.auth.getSession();
-  const token = session?.access_token;
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError) {
+    console.error('Session error:', sessionError);
+  }
+  
+  // Try user token first, fallback to anon key for anonymous access
+  let token = session?.access_token;
   
   if (!token) {
-    throw new Error('User not authenticated. Please sign in.');
+    console.warn('No user session, falling back to anon key');
+    token = SUPABASE_ANON_KEY;
+  }
+  
+  console.log('DEBUG: Token present:', !!token);
+  console.log('DEBUG: Token length:', token?.length);
+  
+  if (!token) {
+    throw new Error('No authentication token available.');
   }
   
   const response = await fetch(`${EDGE_FUNCTION_URL}/gemini`, {
@@ -27,6 +43,7 @@ const callGeminiEdgeFunction = async (action: string, payload: Record<string, an
 
   if (!response.ok) {
     const error = await response.text();
+    console.error('Edge function error:', error);
     throw new Error(`Edge function error: ${error}`);
   }
 

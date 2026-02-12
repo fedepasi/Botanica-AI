@@ -177,6 +177,10 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // DEBUG: Log auth header
+    const authHeader = req.headers.get('Authorization');
+    console.log('DEBUG: Auth header received:', authHeader ? 'Present' : 'Missing');
+    
     const apiKey = Deno.env.get("GEMINI_API_KEY");
     if (!apiKey) {
       return new Response(
