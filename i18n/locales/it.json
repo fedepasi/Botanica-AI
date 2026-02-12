@@ -96,5 +96,6 @@
   "addDescription": "Aggiungi una descrizione...",
   "sentPhoto": "📷 Foto inviata",
   "invalidImageType": "Seleziona un file immagine valido",
-  "imageTooLarge": "L'immagine è troppo grande (max 5MB)"
+  "imageTooLarge": "L'immagine è troppo grande (max 10MB prima del resize)",
+  "resizingImage": "Ridimensionamento..."
 }

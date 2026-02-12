@@ -5,6 +5,55 @@ import { chatWithBotanica, identifyPlant, fileToBase64 } from '../services/gemin
 import { Message } from '../types';
 import { Spinner } from '../components/Spinner';
 
+// Resize image to max dimensions
+const resizeImage = (file: File, maxWidth: number = 1024, maxHeight: number = 1024): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            // Calculate new dimensions
+            if (width > height) {
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width *= maxHeight / height;
+                    height = maxHeight;
+                }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+
+            const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            URL.revokeObjectURL(img.src);
+            resolve(resizedDataUrl);
+        };
+        img.onerror = reject;
+    });
+};
+
+// Convert data URL to File
+const dataUrlToFile = (dataUrl: string, filename: string): File => {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+};
+
 export const ChatScreen: React.FC = () => {
     const { t, language } = useTranslation();
     const { plants } = useGarden();
@@ -20,6 +69,7 @@ export const ChatScreen: React.FC = () => {
     const [isTyping, setIsTyping] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [isResizing, setIsResizing] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,20 +91,28 @@ export const ChatScreen: React.FC = () => {
             return;
         }
 
-        // Max 5MB
-        if (file.size > 5 * 1024 * 1024) {
-            alert(t('imageTooLarge') || 'L\'immagine è troppo grande (max 5MB)');
+        // Max 10MB before resize
+        if (file.size > 10 * 1024 * 1024) {
+            alert(t('imageTooLarge') || 'L\'immagine è troppo grande (max 10MB prima del resize)');
             return;
         }
 
-        setImageFile(file);
+        setIsResizing(true);
         
-        // Create preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            setImagePreview(e.target?.result as string);
-        };
-        reader.readAsDataURL(file);
+        try {
+            // Resize image to max 1024x1024
+            const resizedDataUrl = await resizeImage(file, 1024, 1024);
+            setImagePreview(resizedDataUrl);
+            
+            // Convert back to File for upload
+            const resizedFile = dataUrlToFile(resizedDataUrl, file.name);
+            setImageFile(resizedFile);
+        } catch (error) {
+            console.error('Resize error:', error);
+            alert('Errore nel ridimensionamento dell\'immagine');
+        } finally {
+            setIsResizing(false);
+        }
     };
 
     const clearImage = () => {
@@ -240,11 +298,15 @@ export const ChatScreen: React.FC = () => {
                     />
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        disabled={isTyping}
+                        disabled={isTyping || isResizing}
                         className="w-10 h-10 rounded-xl flex items-center justify-center bg-garden-green/10 text-garden-green hover:bg-garden-green/20 transition-colors disabled:opacity-50"
                         title={t('attachPhoto') || 'Allega foto'}
                     >
-                        <i className="fa-solid fa-camera text-lg"></i>
+                        {isResizing ? (
+                            <div className="w-5 h-5 border-2 border-garden-green border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                            <i className="fa-solid fa-camera text-lg"></i>
+                        )}
                     </button>
 
                     <input
@@ -252,8 +314,9 @@ export const ChatScreen: React.FC = () => {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder={imagePreview ? t('addDescription') || 'Aggiungi una descrizione...' : t('chatPlaceholder')}
-                        className="flex-grow bg-transparent px-4 py-2 focus:outline-none text-sm font-medium"
+                        placeholder={isResizing ? (t('resizingImage') || 'Ridimensionamento...') : (imagePreview ? t('addDescription') || 'Aggiungi una descrizione...' : t('chatPlaceholder'))}
+                        disabled={isResizing}
+                        className="flex-grow bg-transparent px-4 py-2 focus:outline-none text-sm font-medium disabled:opacity-50"
                     />
                     <button
                         onClick={handleSendMessage}
