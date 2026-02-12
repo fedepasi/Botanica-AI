@@ -1,22 +1,26 @@
 import { Plant, Coords, WeatherInfo, PersistentTask, StructuredCarePlan, StructuredCarePlanResponse } from '../types';
 import { marked } from 'marked';
+import { supabase } from './supabaseClient';
 
 // Fallback to project-specific URL if env var not set
 const SUPABASE_PROJECT_REF = 'khkwrkmsikpsrkeiwvjm';
 const EDGE_FUNCTION_URL = import.meta.env.VITE_SUPABASE_EDGE_FUNCTION_URL || 
   `https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1`;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 const callGeminiEdgeFunction = async (action: string, payload: Record<string, any>) => {
-  if (!SUPABASE_ANON_KEY) {
-    throw new Error('Supabase anon key not configured. Please check your environment variables.');
+  // Get current session to obtain JWT token
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  
+  if (!token) {
+    throw new Error('User not authenticated. Please sign in.');
   }
   
   const response = await fetch(`${EDGE_FUNCTION_URL}/gemini`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify({ action, ...payload }),
   });
