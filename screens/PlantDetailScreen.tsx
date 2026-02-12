@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { generateDetailedCarePlan } from '../services/geminiService';
+import { generateDetailedCarePlan, carePlanToHtml } from '../services/geminiService';
+import { supabaseService } from '../services/supabaseService';
 import { Spinner } from '../components/Spinner';
 import { useGarden } from '../hooks/useGarden';
 import { useTranslation } from '../hooks/useTranslation';
 import { useCareplan } from '../hooks/useCareplan';
+import { useAuth } from '../contexts/AuthContext';
 import { PersistentTask, TaskCategory } from '../types';
 
 const MONTH_LABELS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
@@ -47,7 +49,6 @@ const PlantCalendar: React.FC<{ tasks: PersistentTask[] }> = ({ tasks }) => {
     const yearEnd = new Date(year, 11, 31).getTime();
     const todayPct = ((now.getTime() - yearStart) / (yearEnd - yearStart)) * 100;
 
-    // Group by category
     const categoryGroups = useMemo(() => {
         const groups = new Map<TaskCategory, PersistentTask[]>();
         tasks.forEach(task => {
@@ -67,14 +68,12 @@ const PlantCalendar: React.FC<{ tasks: PersistentTask[] }> = ({ tasks }) => {
             </h2>
 
             <div className="bg-garden-beige/30 rounded-3xl p-4 border border-garden-green/10">
-                {/* Month labels */}
                 <div className="flex mb-3 pl-20">
                     {MONTH_LABELS.map((m, i) => (
                         <div key={i} className="flex-1 text-center text-[9px] font-bold text-gray-400">{m}</div>
                     ))}
                 </div>
 
-                {/* Category rows */}
                 <div className="space-y-2">
                     {categoryGroups.map(([category, catTasks]) => (
                         <div key={category} className="flex items-center">
@@ -85,13 +84,10 @@ const PlantCalendar: React.FC<{ tasks: PersistentTask[] }> = ({ tasks }) => {
                                 </div>
                             </div>
                             <div className="flex-grow relative h-6 bg-white/60 rounded-full">
-                                {/* Gridlines */}
                                 {[...Array(11)].map((_, i) => (
                                     <div key={i} className="absolute top-0 bottom-0 w-px bg-gray-100/50" style={{ left: `${((i + 1) / 12) * 100}%` }}></div>
                                 ))}
-                                {/* Today */}
                                 <div className="absolute top-0 bottom-0 w-0.5 bg-garden-green/50 z-10" style={{ left: `${todayPct}%` }}></div>
-                                {/* Bars */}
                                 {catTasks.map(task => {
                                     let startPct = 0;
                                     let widthPct = 100 / 12;
@@ -126,7 +122,6 @@ const PlantCalendar: React.FC<{ tasks: PersistentTask[] }> = ({ tasks }) => {
                 </div>
             </div>
 
-            {/* Task list (completed history) */}
             {tasks.filter(t => t.status === 'completed').length > 0 && (
                 <div className="mt-4">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">{t('recentlyCompleted')}</p>
@@ -144,7 +139,6 @@ const PlantCalendar: React.FC<{ tasks: PersistentTask[] }> = ({ tasks }) => {
                 </div>
             )}
 
-            {/* Task detail modal */}
             {selectedTask && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-start justify-center pt-16 overflow-y-auto" onClick={() => setSelectedTask(null)}>
                     <div className="bg-white rounded-[32px] w-full max-w-lg mx-4 p-6 mb-8 shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -184,18 +178,74 @@ const PlantCalendar: React.FC<{ tasks: PersistentTask[] }> = ({ tasks }) => {
 export const PlantDetailScreen: React.FC = () => {
     const { plantId } = useParams<{ plantId: string }>();
     const navigate = useNavigate();
-    const { plants, isLoaded, removePlant, updatePlantNotes, updatePlantImage } = useGarden();
+    const { plants, isLoaded, removePlant, updatePlantNotes, updatePlantImage, refreshGarden } = useGarden();
     const { language, t } = useTranslation();
     const { allTasksForCalendar, refreshTasks } = useCareplan();
+    const { user } = useAuth();
 
     const plant = plants.find(p => p.id === plantId);
 
-    const [carePlan, setCarePlan] = useState<string>('');
-    const [isLoading, setIsLoading] = useState(true);
+    const [carePlanHtml, setCarePlanHtml] = useState<string>('');
+    const [isLoadingCarePlan, setIsLoadingCarePlan] = useState(true);
+    const [isRegenerating, setIsRegenerating] = useState(false);
+    const [fromCache, setFromCache] = useState(false);
+    const [lastGeneratedAt, setLastGeneratedAt] = useState<Date | null>(null);
+
     const [notes, setNotes] = useState('');
     const [isSavingNotes, setIsSavingNotes] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const plantTasks = useMemo(() => {
+        return allTasksForCalendar.filter(t => t.plantId === plantId);
+    }, [allTasksForCalendar, plantId]);
+
+    const loadCarePlan = async (forceRegenerate = false) => {
+        if (!plant) return;
+
+        if (forceRegenerate) {
+            setIsRegenerating(true);
+        } else {
+            setIsLoadingCarePlan(true);
+        }
+
+        try {
+            const cachedPlan = (!forceRegenerate && plant.cachedCarePlan) ? plant.cachedCarePlan : null;
+
+            const result = await generateDetailedCarePlan(plant, language, {
+                forceRegenerate,
+                cachedPlan,
+            });
+
+            const html = carePlanToHtml(result.structured, language);
+            setCarePlanHtml(html);
+            setFromCache(result.fromCache);
+
+            if (result.fromCache && plant.carePlanGeneratedAt) {
+                setLastGeneratedAt(new Date(plant.carePlanGeneratedAt));
+            } else {
+                setLastGeneratedAt(new Date());
+            }
+
+            if (!result.fromCache && user) {
+                await supabaseService.cacheCarePlan(plant.id, user.id, result.structured);
+                await refreshGarden();
+            }
+        } catch (error) {
+            console.error('Failed to fetch care plan:', error);
+            setCarePlanHtml('<p class="text-red-500">Failed to load care plan. Please try again.</p>');
+        } finally {
+            setIsLoadingCarePlan(false);
+            setIsRegenerating(false);
+        }
+    };
+
+    useEffect(() => {
+        if (plant) {
+            setNotes(plant.notes || '');
+            loadCarePlan();
+        }
+    }, [plant, language]);
 
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -203,7 +253,6 @@ export const PlantDetailScreen: React.FC = () => {
 
         setIsUploadingImage(true);
         try {
-            // Convert to base64
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const base64 = e.target?.result as string;
@@ -221,27 +270,10 @@ export const PlantDetailScreen: React.FC = () => {
         }
     };
 
-    // Get tasks for this specific plant
-    const plantTasks = useMemo(() => {
-        return allTasksForCalendar.filter(t => t.plantId === plantId);
-    }, [allTasksForCalendar, plantId]);
-
-    useEffect(() => {
-        if (plant) {
-            setNotes(plant.notes || '');
-        }
-    }, [plant]);
-
-    useEffect(() => {
+    const handleRegenerateCarePlan = async () => {
         if (!plant) return;
-        const fetchCarePlan = async () => {
-            setIsLoading(true);
-            const plan = await generateDetailedCarePlan(plant, language);
-            setCarePlan(plan);
-            setIsLoading(false);
-        };
-        fetchCarePlan();
-    }, [plant, language]);
+        await loadCarePlan(true);
+    };
 
     if (!isLoaded) {
         return <Spinner text={t('loadingGarden')} />;
@@ -272,12 +304,29 @@ export const PlantDetailScreen: React.FC = () => {
         }
     };
 
-    const handleSaveNotes = () => {
+    const handleSaveNotes = async () => {
+        if (!plant) return;
         setIsSavingNotes(true);
-        updatePlantNotes(plant.id, notes);
-        setTimeout(() => {
-            setIsSavingNotes(false);
-        }, 1500);
+        try {
+            await updatePlantNotes(plant.id, notes);
+        } catch (error) {
+            console.error('Failed to save notes:', error);
+        } finally {
+            setTimeout(() => {
+                setIsSavingNotes(false);
+            }, 1500);
+        }
+    };
+
+    const getLastGeneratedText = () => {
+        if (!lastGeneratedAt) return '';
+        const now = new Date();
+        const diffMs = now.getTime() - lastGeneratedAt.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) return t('generatedToday') || 'Generated today';
+        if (diffDays === 1) return t('generatedYesterday') || 'Generated yesterday';
+        return `${t('generated') || 'Generated'} ${diffDays} ${t('daysAgo') || 'days ago'}`;
     };
 
     return (
@@ -300,7 +349,6 @@ export const PlantDetailScreen: React.FC = () => {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     
-                    {/* Change Photo Button */}
                     <input
                         ref={fileInputRef}
                         type="file"
@@ -333,21 +381,48 @@ export const PlantDetailScreen: React.FC = () => {
                         <p className="text-gray-700 font-medium leading-relaxed">{plant.careNeeds}</p>
                     </div>
 
-                    {/* Annual Calendar */}
                     <PlantCalendar tasks={plantTasks} />
 
                     <div className="mb-10">
-                        <h2 className="text-2xl font-black text-gray-900 mb-6 tracking-tight">
-                            <span className="highlight-yellow inline-block">{t('detailedCarePlan')}</span>
-                        </h2>
-                        {isLoading ? (
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+                                <span className="highlight-yellow inline-block">{t('detailedCarePlan')}</span>
+                            </h2>
+                            <button
+                                onClick={handleRegenerateCarePlan}
+                                disabled={isRegenerating}
+                                className="flex items-center px-4 py-2 bg-garden-beige/70 hover:bg-garden-beige text-garden-green rounded-full text-sm font-bold transition-all disabled:opacity-50"
+                                title={t('regenerateCarePlan') || 'Regenerate care plan'}
+                            >
+                                {isRegenerating ? (
+                                    <i className="fa-solid fa-circle-notch animate-spin mr-2"></i>
+                                ) : (
+                                    <i className="fa-solid fa-rotate mr-2"></i>
+                                )}
+                                {t('regenerate') || 'Regenerate'}
+                            </button>
+                        </div>
+
+                        {(fromCache || lastGeneratedAt) && !isLoadingCarePlan && (
+                            <div className="flex items-center mb-4 text-xs text-gray-500">
+                                <i className={`fa-solid ${fromCache ? 'fa-database' : 'fa-sparkles'} mr-2`}></i>
+                                <span>
+                                    {fromCache 
+                                        ? `${t('fromCache') || 'From cache'} • ${getLastGeneratedText()}`
+                                        : `${t('freshlyGenerated') || 'Freshly generated'} • ${getLastGeneratedText()}`
+                                    }
+                                </span>
+                            </div>
+                        )}
+
+                        {isLoadingCarePlan ? (
                             <div className="py-10">
                                 <Spinner text={t('generatingPlan')} />
                             </div>
                         ) : (
                             <div
                                 className="prose prose-green max-w-none text-gray-600 font-medium leading-loose"
-                                dangerouslySetInnerHTML={{ __html: carePlan }}
+                                dangerouslySetInnerHTML={{ __html: carePlanHtml }}
                             />
                         )}
                     </div>

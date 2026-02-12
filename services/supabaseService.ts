@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { PersistentTask, WeatherInfo } from '../types';
+import { PersistentTask, WeatherInfo, StructuredCarePlan } from '../types';
 
 const TABLE_PREFIX = 'botanica_';
 const BUCKET_PREFIX = 'botanica_';
@@ -52,6 +52,10 @@ export const supabaseService = {
             notes: p.notes,
             latitude: p.latitude,
             longitude: p.longitude,
+            // Cache piano di cura (Task #24)
+            cachedCarePlan: p.cached_care_plan,
+            carePlanGeneratedAt: p.care_plan_generated_at,
+            carePlanNeedsRegeneration: p.care_plan_needs_regeneration,
         }));
     },
 
@@ -403,5 +407,112 @@ export const supabaseService = {
             }, { onConflict: 'user_id,generated_date' });
 
         if (error) throw error;
+    },
+
+    // ========================================
+    // Care Plan Cache (Task #24)
+    // ========================================
+    
+    /**
+     * Salva il piano di cura in cache per una pianta
+     */
+    async cacheCarePlan(
+        plantId: string,
+        userId: string,
+        carePlan: StructuredCarePlan
+    ): Promise<void> {
+        const { error } = await supabase
+            .from(getPrefixedTableName('plants'))
+            .update({
+                cached_care_plan: carePlan,
+                care_plan_generated_at: new Date().toISOString(),
+                care_plan_needs_regeneration: false,
+            })
+            .eq('id', plantId)
+            .eq('user_id', userId);
+        
+        if (error) throw error;
+    },
+
+    /**
+     * Richiede la rigenerazione manuale del piano di cura
+     */
+    async requestCarePlanRegeneration(plantId: string, userId: string): Promise<void> {
+        const { error } = await supabase
+            .from(getPrefixedTableName('plants'))
+            .update({
+                care_plan_needs_regeneration: true,
+                cached_care_plan: null,
+                care_plan_generated_at: null,
+            })
+            .eq('id', plantId)
+            .eq('user_id', userId);
+        
+        if (error) throw error;
+    },
+
+    /**
+     * Verifica se il piano di cura in cache è valido (non scaduto)
+     * @returns Il piano di cura se valido, null altrimenti
+     */
+    async getCachedCarePlan(
+        plantId: string,
+        userId: string,
+        maxAgeDays: number = 15
+    ): Promise<StructuredCarePlan | null> {
+        const { data, error } = await supabase
+            .from(getPrefixedTableName('plants'))
+            .select('cached_care_plan, care_plan_generated_at, care_plan_needs_regeneration')
+            .eq('id', plantId)
+            .eq('user_id', userId)
+            .single();
+        
+        if (error || !data) return null;
+        
+        // Se richiesta rigenerazione manuale, invalida cache
+        if (data.care_plan_needs_regeneration) {
+            return null;
+        }
+        
+        // Se non c'è piano in cache, ritorna null
+        if (!data.cached_care_plan || !data.care_plan_generated_at) {
+            return null;
+        }
+        
+        // Verifica se il piano è scaduto
+        const generatedAt = new Date(data.care_plan_generated_at);
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - generatedAt.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > maxAgeDays) {
+            return null;
+        }
+        
+        return data.cached_care_plan as StructuredCarePlan;
+    },
+
+    /**
+     * Ottiene tutte le piante che necessitano rigenerazione del piano
+     * (per cron job o batch processing)
+     */
+    async getPlantsNeedingCarePlanRegeneration(
+        userId: string,
+        maxAgeDays: number = 15,
+        limit: number = 100
+    ): Promise<Array<{ plantId: string; name: string; generatedAt: string | null }>> {
+        const { data, error } = await supabase
+            .from(getPrefixedTableName('plants'))
+            .select('id, name, care_plan_generated_at')
+            .eq('user_id', userId)
+            .or(`care_plan_needs_regeneration.eq.true,care_plan_generated_at.is.null,care_plan_generated_at.lt.${new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000).toISOString()}`)
+            .limit(limit);
+        
+        if (error) throw error;
+        
+        return (data || []).map(p => ({
+            plantId: p.id,
+            name: p.name,
+            generatedAt: p.care_plan_generated_at,
+        }));
     },
 };

@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 .env
+.env.local
+.env.*.local
+supabase/.temp
+supabase/.env
 
 # Editor directories and files
 .vscode/*
@@ -23,3 +27,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+deliverables-p0-tasks.tar.gz
+activity-log.json
+tasks.json

@@ -113,21 +113,8 @@ export const searchPlantByName = async (
 export const generateDetailedCarePlan = async (
   plant: Plant,
   language: string,
-  options: { 
-    format?: 'markdown' | 'json' | 'both';
-    forceRegenerate?: boolean;
-    cachedPlan?: StructuredCarePlan | null;
-  } = {}
-): Promise<StructuredCarePlanResponse & { fromCache: boolean }> => {
-  // Se c'è un piano in cache e non è richiesta la rigenerazione forzata, usa cache
-  if (!options.forceRegenerate && options.cachedPlan) {
-    return {
-      structured: options.cachedPlan,
-      markdown: undefined,
-      fromCache: true,
-    };
-  }
-
+  options: { format?: 'markdown' | 'json' | 'both' } = {}
+): Promise<StructuredCarePlanResponse> => {
   const result = await callGeminiEdgeFunction('generateDetailedCarePlan', {
     plantName: plant.name,
     description: plant.description,
@@ -141,7 +128,6 @@ export const generateDetailedCarePlan = async (
     return {
       structured: result.structured as StructuredCarePlan,
       markdown: result.markdown,
-      fromCache: false,
     };
   }
 
@@ -153,7 +139,6 @@ export const generateDetailedCarePlan = async (
       soil: { type: '' },
     },
     markdown: result.markdown,
-    fromCache: false,
   };
 };
 

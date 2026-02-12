@@ -7,10 +7,6 @@ export interface Plant {
   notes: string;
   latitude?: number;
   longitude?: number;
-  // Cache piano di cura (Task #24)
-  cachedCarePlan?: StructuredCarePlan | null;
-  carePlanGeneratedAt?: string | null;
-  carePlanNeedsRegeneration?: boolean;
 }
 
 export interface Message {
