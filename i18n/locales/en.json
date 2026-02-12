@@ -91,5 +91,10 @@
   "plantNotFound": "Plant not found",
   "changePhoto": "Change Photo",
   "email": "Email",
-  "signOut": "Sign Out"
+  "signOut": "Sign Out",
+  "attachPhoto": "Attach photo",
+  "addDescription": "Add a description...",
+  "sentPhoto": "📷 Photo sent",
+  "invalidImageType": "Please select a valid image file",
+  "imageTooLarge": "Image is too large (max 5MB)"
 }

@@ -28,10 +28,12 @@ L'unico AI orticoltore personale — un'app che guida gli utenti nella cura del 
 - ✅ Task #17: Fix API Key Exposure (Edge Functions Gemini) — DONE
 - ✅ Task #16: Fix XSS (DOMPurify) — DONE
 
-### Task in Attesa (bloccati)
+### Task Completati Oggi
 - ✅ Task #30: Eseguire migrazioni SQL 004 + 005 — DONE
 - ✅ Task #31: Deploy Edge Functions Supabase — DONE  
-- ⏸️ **Task #31b: Configurare GEMINI_API_KEY in Supabase Secrets** — **BLOCKER (richiede Federico)**
+- ✅ Task #31b: Configurare GEMINI_API_KEY in Supabase Secrets — DONE
+
+### Task in Attesa
 - ⏸️ Task #18: Pitch Orto da Coltivare — REVIEW (attende approvazione)
 
 ---

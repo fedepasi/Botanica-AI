@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useGarden } from '../hooks/useGarden';
-import { chatWithBotanica } from '../services/geminiService';
+import { chatWithBotanica, identifyPlant, fileToBase64 } from '../services/geminiService';
 import { Message } from '../types';
+import { Spinner } from '../components/Spinner';
 
 export const ChatScreen: React.FC = () => {
     const { t, language } = useTranslation();
@@ -17,7 +18,10 @@ export const ChatScreen: React.FC = () => {
     ]);
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -27,12 +31,47 @@ export const ChatScreen: React.FC = () => {
         scrollToBottom();
     }, [messages]);
 
+    const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate image
+        if (!file.type.startsWith('image/')) {
+            alert(t('invalidImageType') || 'Seleziona un file immagine');
+            return;
+        }
+
+        // Max 5MB
+        if (file.size > 5 * 1024 * 1024) {
+            alert(t('imageTooLarge') || 'L\'immagine è troppo grande (max 5MB)');
+            return;
+        }
+
+        setImageFile(file);
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setImagePreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const clearImage = () => {
+        setImagePreview(null);
+        setImageFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
     const handleSendMessage = async () => {
-        if (!inputValue.trim() || isTyping) return;
+        if ((!inputValue.trim() && !imageFile) || isTyping) return;
 
         const userMsg: Message = {
             id: Date.now().toString(),
-            text: inputValue,
+            text: inputValue || (imageFile ? t('sentPhoto') || '📷 Foto' : ''),
+            imageUrl: imagePreview || undefined,
             sender: 'user',
             timestamp: new Date()
         };
@@ -42,11 +81,49 @@ export const ChatScreen: React.FC = () => {
         setIsTyping(true);
 
         try {
-            const responseText = await chatWithBotanica(
-                [...messages, userMsg].map(m => ({ text: m.text, sender: m.sender })),
-                plants,
-                language
-            );
+            let responseText: string;
+
+            // If there's an image, analyze it first
+            if (imageFile && imagePreview) {
+                const base64Image = await fileToBase64(imageFile);
+                
+                // First, identify what's in the image
+                const identification = await identifyPlant(
+                    base64Image,
+                    imageFile.type,
+                    language
+                );
+
+                // Then, chat with context about the identified plant/problem
+                const contextMessage = language === 'it' 
+                    ? `Ho inviato una foto di: ${identification.name}. ${identification.description}. Sembra avere questo problema: ${inputValue || 'non specificato'}.`
+                    : `I sent a photo of: ${identification.name}. ${identification.description}. It seems to have this issue: ${inputValue || 'not specified'}.`;
+
+                responseText = await chatWithBotanica(
+                    [
+                        ...messages.map(m => ({ text: m.text, sender: m.sender })),
+                        { text: contextMessage, sender: 'user' }
+                    ],
+                    [...plants, {
+                        id: 'temp-' + Date.now(),
+                        name: identification.name,
+                        description: identification.description,
+                        careNeeds: identification.careNeeds,
+                        imageUrl: identification.imageUrl,
+                        notes: ''
+                    }],
+                    language
+                );
+
+                clearImage();
+            } else {
+                // Regular text-only chat
+                responseText = await chatWithBotanica(
+                    [...messages, userMsg].map(m => ({ text: m.text, sender: m.sender })),
+                    plants,
+                    language
+                );
+            }
 
             const botanicaMsg: Message = {
                 id: (Date.now() + 1).toString(),
@@ -101,6 +178,13 @@ export const ChatScreen: React.FC = () => {
                                 : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
                                 }`}
                         >
+                            {m.imageUrl && (
+                                <img 
+                                    src={m.imageUrl} 
+                                    alt="User upload" 
+                                    className="rounded-2xl mb-3 max-h-48 object-cover"
+                                />
+                            )}
                             <p className="text-sm leading-relaxed font-medium">{m.text}</p>
                             <span className={`text-[9px] mt-2 block font-bold uppercase tracking-widest opacity-40 ${m.sender === 'user' ? 'text-right' : 'text-left'}`}>
                                 {m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -123,24 +207,65 @@ export const ChatScreen: React.FC = () => {
                 <div ref={messagesEndRef} />
             </div>
 
+            {/* Image Preview */}
+            {imagePreview && (
+                <div className="px-6 pb-3">
+                    <div className="inline-flex items-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-garden-green/20">
+                        <img 
+                            src={imagePreview} 
+                            alt="Preview" 
+                            className="h-16 w-16 object-cover rounded-xl"
+                        />
+                        <button
+                            onClick={clearImage}
+                            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200"
+                        >
+                            <i className="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Input Area */}
             <div className="p-6 bg-transparent">
                 <div className="flex items-center space-x-3 bg-white p-3 rounded-[32px] border-2 border-transparent shadow-2xl shadow-garden-green/10 focus-within:border-garden-green transition-all">
+                    {/* Camera Button */}
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleImageSelect}
+                        className="hidden"
+                    />
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isTyping}
+                        className="w-10 h-10 rounded-xl flex items-center justify-center bg-garden-green/10 text-garden-green hover:bg-garden-green/20 transition-colors disabled:opacity-50"
+                        title={t('attachPhoto') || 'Allega foto'}
+                    >
+                        <i className="fa-solid fa-camera text-lg"></i>
+                    </button>
+
                     <input
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder={t('chatPlaceholder')}
+                        placeholder={imagePreview ? t('addDescription') || 'Aggiungi una descrizione...' : t('chatPlaceholder')}
                         className="flex-grow bg-transparent px-4 py-2 focus:outline-none text-sm font-medium"
                     />
                     <button
                         onClick={handleSendMessage}
-                        disabled={!inputValue.trim() || isTyping}
-                        className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${!inputValue.trim() || isTyping ? 'text-gray-300 bg-gray-50' : 'bg-garden-green text-white shadow-lg shadow-garden-green/20 active:scale-90'
+                        disabled={(!inputValue.trim() && !imageFile) || isTyping}
+                        className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${(!inputValue.trim() && !imageFile) || isTyping ? 'text-gray-300 bg-gray-50' : 'bg-garden-green text-white shadow-lg shadow-garden-green/20 active:scale-90'
                             }`}
                     >
-                        <i className="fa-solid fa-paper-plane text-lg"></i>
+                        {isTyping ? (
+                            <Spinner size="small" />
+                        ) : (
+                            <i className="fa-solid fa-paper-plane text-lg"></i>
+                        )}
                     </button>
                 </div>
             </div>

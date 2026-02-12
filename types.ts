@@ -16,6 +16,7 @@ export interface Plant {
 export interface Message {
   id: string;
   text: string;
+  imageUrl?: string;
   sender: 'user' | 'botanica';
   timestamp: Date;
 }
