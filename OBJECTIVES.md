@@ -13,28 +13,31 @@ L'unico AI orticoltore personale — un'app che guida gli utenti nella cura del 
 
 ---
 
-## 📍 Current Phase: DEVELOPMENT
+## 📍 Current Phase: DEVELOPMENT → GROWTH
 
-### Milestone Attuale: Core Feature Complete
-**Target:** Completare le funzionalità core prima del lancio beta
+### Milestone Attuale: Beta Launch Prep
+**Target:** Preparare l'app per il primo rilascio beta con utenti reali
 
-**Stato:** 85% completato — attesa deploy e migrazioni da Federico
+**Stato:** 90% completato — funzionalità core pronte, mancano test e analytics
 
 ### Task Completati ( ultimi 7 giorni )
 - ✅ Task #21: Piano di cura strutturato JSON — DONE
-- ✅ Task #22: Refactoring homepage UX — DONE (design doc pronto)
+- ✅ Task #22: Refactoring homepage UX — DONE (implementato su main)
 - ✅ Task #23: Sistema cronologia e note per pianta — DONE
 - ✅ Task #24: Cache piano di cura + rigenerazione smart — DONE
 - ✅ Task #17: Fix API Key Exposure (Edge Functions Gemini) — DONE
 - ✅ Task #16: Fix XSS (DOMPurify) — DONE
+- ✅ Task #30: Migrazioni SQL 004 + 005 — DONE (eseguite da Federico)
+- ✅ Task #31: Deploy Edge Functions Supabase — DONE (deployate da Federico)
+- ✅ Task #35: Upload/Capture Foto in Chat — DONE
 
-### Task Completati Oggi
+### Task Completati Oggi (13 Feb)
 - ✅ Task #30: Eseguire migrazioni SQL 004 + 005 — DONE
 - ✅ Task #31: Deploy Edge Functions Supabase — DONE  
 - ✅ Task #31b: Configurare GEMINI_API_KEY in Supabase Secrets — DONE
 
-### Task in Attesa
-- ⏸️ Task #18: Pitch Orto da Coltivare — REVIEW (attende approvazione)
+### Task in Attesa (bloccati da Federico)
+- ⏸️ Task #18: Pitch Orto da Coltivare — REVIEW (attende approvazione invio email)
 
 ---
 
@@ -43,12 +46,12 @@ L'unico AI orticoltore personale — un'app che guida gli utenti nella cura del 
 **Obiettivo:** Preparare l'app per il primo rilascio beta con utenti reali
 
 ### Checklist Pre-Beta
-- [ ] Migrazioni SQL eseguite su Supabase (004_plant_notes_diary.sql, 005_care_plan_cache.sql)
-- [ ] Edge Functions deployate (gemini, careplan-cache)
-- [ ] Homepage UX refactoring implementato (Task #22)
-- [ ] Test E2E su mobile (PWA)
-- [ ] Setup analytics (Supabase + event tracking)
-- [ ] Partnership ODC: pitch inviato e call fatta
+- [x] Migrazioni SQL eseguite su Supabase (004_plant_notes_diary.sql, 005_care_plan_cache.sql)
+- [x] Edge Functions deployate (gemini, careplan-cache)
+- [x] Homepage UX refactoring implementato (Task #22)
+- [ ] Test E2E su mobile (PWA) — IN PROGRESS
+- [ ] Setup analytics (Supabase + event tracking) — TODO
+- [ ] Partnership ODC: pitch inviato e call fatta — ATTESA FEDERICO
 
 ### Post-Beta (Phase: GROWTH)
 - [ ] Onboarding flow ottimizzato
@@ -72,17 +75,18 @@ L'unico AI orticoltore personale — un'app che guida gli utenti nella cura del 
 
 ## 🌱 Prossime Azioni (cosa posso fare oggi)
 
-1. **Documentazione:** Completare README tecnico per Federico (deploy checklist)
-2. **Testing:** Verificare build locale post-commit
-3. **Design:** Preparare mockups Task #22 per implementazione
+1. **Testing:** Creare E2E Testing Checklist per beta testing mobile — IN CORSO
+2. **Analytics:** Setup tracking plan per eventi core (onboarding, plant add, task complete)
+3. **Documentazione:** Aggiornare deploy checklist con post-deploy verification
 4. **Marketing:** Bozze contenuti social per lancio beta
 
 ---
 
 ## 📝 Note
 
-- App tecnicamente pronta per migrazioni/deploy — solo necessarie credenziali/approvazioni
-- Edge function Gemini funzionante (testata in dev)
-- Cache care plan implementata (frontend + service pronti)
-- Homepage UX refactoring: design completo, attesa implementazione
+- ✅ Migrazioni SQL eseguite e Edge Functions deployate (13 feb 2026)
+- ✅ Homepage UX refactoring implementato e su main
+- ✅ Upload foto in chat completato con resize automatico
+- ⏸️ Task #22 implementato, necessita test E2E su mobile
+- ⏸️ Task #18 (pitch ODC) in attesa approvazione Federico per invio
 
