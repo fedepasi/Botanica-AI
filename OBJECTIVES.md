@@ -30,6 +30,7 @@ L'unico AI orticoltore personale — un'app che guida gli utenti nella cura del 
 - ✅ Task #30: Migrazioni SQL 004 + 005 — DONE (eseguite da Federico)
 - ✅ Task #31: Deploy Edge Functions Supabase — DONE (deployate da Federico)
 - ✅ Task #35: Upload/Capture Foto in Chat — DONE
+- ✅ Task #36: Fix i18n hardcoded "or Upload" — DONE (17 feb 2026)
 
 ### Task Completati Oggi (13 Feb)
 - ✅ Task #30: Eseguire migrazioni SQL 004 + 005 — DONE
