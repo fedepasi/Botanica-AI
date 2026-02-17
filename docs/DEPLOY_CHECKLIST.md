@@ -55,8 +55,9 @@ supabase login
 # Link progetto (se non già fatto)  
 supabase link --project-ref khkwrkmsikpsrkeiwvjm
 
-# Deploy functions
-supabase functions deploy gemini
+# IMPORTANTE: deploy con config.toml che include verify_jwt=false
+# (la verifica JWT è gestita internamente dalla funzione)
+supabase functions deploy gemini --no-verify-jwt
 supabase functions deploy careplan-cache
 ```
 

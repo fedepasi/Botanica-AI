@@ -736,16 +736,20 @@ Remember: "task" and "reason" MUST be in ${langName}.
 
       case "chat": {
         const { messages, plants, language } = body;
+        // Fix: null-check on plants and messages to prevent crash when undefined
+        const safePlants: any[] = Array.isArray(plants) ? plants : [];
+        const safeMessages: any[] = Array.isArray(messages) ? messages : [];
         const plantContext =
-          plants.length > 0
-            ? `The user has the following plants in their garden: ${plants.map((p: any) => p.name).join(", ")}.`
+          safePlants.length > 0
+            ? `The user has the following plants in their garden: ${safePlants.map((p: any) => p.name).join(", ")}.`
             : "The user doesn't have any plants in their garden yet.";
 
-        const history = messages
+        const history = safeMessages
           .slice(0, -1)
           .map((m: any) => `${m.sender === "user" ? "User" : "Botanica"}: ${m.text}`)
           .join("\n");
-        const currentMessage = messages[messages.length - 1].text;
+        const lastMsg = safeMessages[safeMessages.length - 1];
+        const currentMessage = lastMsg?.text ?? body.message ?? "";
 
         const prompt = `
     You are Anica, a friendly and expert AI garden assistant.
