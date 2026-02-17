@@ -230,8 +230,8 @@ export const carePlanToHtml = (carePlan: StructuredCarePlan, language: string = 
     html += '</section>';
   }
 
-  // Pruning
-  if (carePlan.pruning) {
+  // Pruning — only render if at least one field has content
+  if (carePlan.pruning && (carePlan.pruning.timing || carePlan.pruning.technique || carePlan.pruning.frequency)) {
     html += `<section class="care-section"><h3>${t('✂️ Pruning', '✂️ Potatura')}</h3>`;
     if (carePlan.pruning.timing) html += `<p><strong>${t('When', 'Quando')}:</strong> ${carePlan.pruning.timing}</p>`;
     if (carePlan.pruning.technique) html += `<p><strong>${t('How', 'Come')}:</strong> ${carePlan.pruning.technique}</p>`;
@@ -239,8 +239,8 @@ export const carePlanToHtml = (carePlan: StructuredCarePlan, language: string = 
     html += '</section>';
   }
 
-  // Temperature
-  if (carePlan.temperature) {
+  // Temperature — only render if at least one field has content
+  if (carePlan.temperature && (carePlan.temperature.idealRange || carePlan.temperature.hardiness || carePlan.temperature.humidity)) {
     html += `<section class="care-section"><h3>${t('🌡️ Temperature', '🌡️ Temperatura')}</h3>`;
     if (carePlan.temperature.idealRange) html += `<p><strong>${t('Ideal Range', 'Range ideale')}:</strong> ${carePlan.temperature.idealRange}</p>`;
     if (carePlan.temperature.hardiness) html += `<p><strong>${t('Hardiness', 'Resistenza')}:</strong> ${carePlan.temperature.hardiness}</p>`;
@@ -248,8 +248,8 @@ export const carePlanToHtml = (carePlan: StructuredCarePlan, language: string = 
     html += '</section>';
   }
 
-  // Pests
-  if (carePlan.pests) {
+  // Pests — only render if at least one field has content
+  if (carePlan.pests && (carePlan.pests.common || carePlan.pests.prevention || carePlan.pests.treatment)) {
     html += `<section class="care-section"><h3>${t('🐛 Pests & Diseases', '🐛 Parassiti e malattie')}</h3>`;
     if (carePlan.pests.common) html += `<p><strong>${t('Common', 'Comuni')}:</strong> ${carePlan.pests.common}</p>`;
     if (carePlan.pests.prevention) html += `<p><strong>${t('Prevention', 'Prevenzione')}:</strong> ${carePlan.pests.prevention}</p>`;
@@ -257,8 +257,8 @@ export const carePlanToHtml = (carePlan: StructuredCarePlan, language: string = 
     html += '</section>';
   }
 
-  // Repotting
-  if (carePlan.repotting) {
+  // Repotting — only render if at least one field has content
+  if (carePlan.repotting && (carePlan.repotting.frequency || carePlan.repotting.timing || carePlan.repotting.potSize)) {
     html += `<section class="care-section"><h3>${t('🪴 Repotting', '🪴 Rinvaso')}</h3>`;
     if (carePlan.repotting.frequency) html += `<p><strong>${t('Frequency', 'Frequenza')}:</strong> ${carePlan.repotting.frequency}</p>`;
     if (carePlan.repotting.timing) html += `<p><strong>${t('When', 'Quando')}:</strong> ${carePlan.repotting.timing}</p>`;
@@ -266,8 +266,8 @@ export const carePlanToHtml = (carePlan: StructuredCarePlan, language: string = 
     html += '</section>';
   }
 
-  // Harvesting
-  if (carePlan.harvesting) {
+  // Harvesting — only render if at least one field has content
+  if (carePlan.harvesting && (carePlan.harvesting.timing || carePlan.harvesting.technique || carePlan.harvesting.storage)) {
     html += `<section class="care-section"><h3>${t('🍎 Harvesting', '🍎 Raccolta')}</h3>`;
     if (carePlan.harvesting.timing) html += `<p><strong>${t('When', 'Quando')}:</strong> ${carePlan.harvesting.timing}</p>`;
     if (carePlan.harvesting.technique) html += `<p><strong>${t('Technique', 'Tecnica')}:</strong> ${carePlan.harvesting.technique}</p>`;

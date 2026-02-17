@@ -445,7 +445,11 @@ Care needs: ${careNeeds}
 Respond in ${langName} with a structured JSON object following the schema.
 All text values MUST be in ${langName}.
 
-IMPORTANT: Always return the full structure, using empty strings "" for optional fields that don't apply to this plant type.`;
+IMPORTANT: Only include sections that are RELEVANT for this plant type.
+- For outdoor vegetables (e.g. tomato, basil): include watering, sunlight, soil, fertilizing, pruning, temperature, pests, harvesting. Skip repotting.
+- For houseplants: include watering, sunlight, soil, fertilizing, repotting. Skip harvesting.
+- For fruit trees: include watering, sunlight, soil, fertilizing, pruning, pest_prevention, harvesting. Skip repotting.
+- OMIT optional fields entirely if they don't apply — do NOT return empty strings for them.`;
 
         const response = await ai.models.generateContent({
           model: "gemini-2.5-flash",
