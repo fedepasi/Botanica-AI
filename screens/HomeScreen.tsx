@@ -77,7 +77,7 @@ export const HomeScreen: React.FC = () => {
       {/* Welcome header */}
       <div className="mb-10 pt-4">
         <h1 className="text-5xl font-black text-gray-900 tracking-tight leading-tight">
-          {t('welcomeTitle')}, <span className="highlight-yellow inline-block">{user?.email?.split('@')[0]}</span>
+          {t('welcomeTitle')} <span className="highlight-yellow inline-block">{user?.email?.split('@')[0]}</span>!
         </h1>
         <p className="text-gray-500 mt-2 text-lg font-medium tracking-wide italic decoration-garden-yellow underline decoration-2 underline-offset-4">
           {t('welcomeMessage')}
