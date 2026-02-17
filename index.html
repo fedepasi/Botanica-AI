@@ -99,6 +99,70 @@
     .animate-fade-in {
       animation: fadeIn 0.5s ease-out forwards;
     }
+
+    /* Care Plan Sections */
+    .care-plan {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .care-section {
+      background: #ffffff;
+      border: 1.5px solid #f0ebe0;
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+    }
+
+    .care-section h3 {
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--garden-green);
+      margin: 0 0 0.6rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 1.5px solid #f0ebe0;
+    }
+
+    .care-section p {
+      font-size: 0.875rem;
+      margin: 0.25rem 0;
+      color: #4b5563;
+      line-height: 1.5;
+    }
+
+    .care-section.warnings {
+      border-color: #fde68a;
+      background: #fffbeb;
+    }
+
+    .care-section.warnings h3 {
+      color: #b45309;
+      border-bottom-color: #fde68a;
+    }
+
+    .care-section.tips {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .care-section.tips h3 {
+      color: var(--garden-green);
+      border-bottom-color: #bbf7d0;
+    }
+
+    .care-section ul {
+      margin: 0.25rem 0 0 0;
+      padding-left: 1.25rem;
+    }
+
+    .care-section li {
+      font-size: 0.875rem;
+      color: #4b5563;
+      line-height: 1.5;
+      margin: 0.2rem 0;
+    }
   </style>
 </head>
 
