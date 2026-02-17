@@ -285,7 +285,7 @@ export const AddPlantScreen: React.FC = () => {
                   <i className="fa-solid fa-image text-3xl"></i>
                 </div>
               </div>
-              <p className="text-xs font-black uppercase tracking-widest text-garden-green/60">{t('tapToStartCamera')} or Upload</p>
+              <p className="text-xs font-black uppercase tracking-widest text-garden-green/60">{t('tapToStartCameraOrUpload')}</p>
               <input
                 type="file"
                 ref={fileInputRef}
