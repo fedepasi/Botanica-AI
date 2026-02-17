@@ -1,6 +1,7 @@
 import React from 'react';
 import { TasksByCategory, PlantTaskGroup } from '../hooks/useGroupedTasks';
 import { DisplayTask } from '../types';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface TaskItemProps {
   task: DisplayTask;
@@ -9,6 +10,8 @@ interface TaskItemProps {
 }
 
 const TaskItemRow: React.FC<TaskItemProps> = ({ task, onComplete }) => {
+  const { t } = useTranslation();
+
   const handleComplete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onComplete(task.id);
@@ -16,9 +19,9 @@ const TaskItemRow: React.FC<TaskItemProps> = ({ task, onComplete }) => {
 
   const getTimingBadge = (timing: DisplayTask['timing']) => {
     switch (timing) {
-      case 'this_week': return { label: 'This week', cls: 'text-blue-700 bg-blue-50' };
-      case 'this_month': return { label: 'This month', cls: 'text-indigo-700 bg-indigo-50' };
-      default: return { label: 'Upcoming', cls: 'text-gray-600 bg-gray-50' };
+      case 'this_week': return { label: t('timingThisWeek'), cls: 'text-blue-700 bg-blue-50' };
+      case 'this_month': return { label: t('timingThisMonth'), cls: 'text-indigo-700 bg-indigo-50' };
+      default: return { label: t('timingUpcoming'), cls: 'text-gray-600 bg-gray-50' };
     }
   };
 
@@ -65,6 +68,7 @@ interface WorkCategoryProps {
 }
 
 export const WorkCategory: React.FC<WorkCategoryProps> = ({ group, isExpanded, onToggle, onComplete }) => {
+  const { t } = useTranslation();
   const plantCount = group.plantGroups.length;
 
   return (
@@ -80,7 +84,7 @@ export const WorkCategory: React.FC<WorkCategoryProps> = ({ group, isExpanded, o
         <div className="ml-3 text-left flex-grow">
           <span className="font-bold text-gray-800 text-base">{group.categoryLabel}</span>
           <span className="text-xs text-gray-400 ml-2">
-            {plantCount} {plantCount === 1 ? 'pianta' : 'piante'} · {group.totalTasks} task
+            {plantCount} {plantCount === 1 ? t('plantSingular') : t('plantPlural')} · {group.totalTasks} {t('taskLabel')}
           </span>
         </div>
         <i className={`fa-solid fa-chevron-right text-gray-300 text-sm transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}></i>

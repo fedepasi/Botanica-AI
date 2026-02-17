@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DisplayTask } from '../types';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface UrgentBannerProps {
   tasks: DisplayTask[];
@@ -8,6 +9,7 @@ interface UrgentBannerProps {
 
 export const UrgentBanner: React.FC<UrgentBannerProps> = ({ tasks, onComplete }) => {
   const [expanded, setExpanded] = useState(true);
+  const { t } = useTranslation();
 
   if (tasks.length === 0) return null;
 
@@ -23,7 +25,7 @@ export const UrgentBanner: React.FC<UrgentBannerProps> = ({ tasks, onComplete })
       >
         <div className="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></div>
         <span className="font-bold text-red-700 text-base flex-grow text-left">
-          {tasks.length} {tasks.length === 1 ? 'urgente' : 'urgenti'}
+          {tasks.length} {tasks.length === 1 ? t('urgentSingular') : t('urgentPlural')}
         </span>
         <i className={`fa-solid fa-chevron-down text-red-300 text-xs transition-transform ${expanded ? 'rotate-180' : ''}`}></i>
       </button>
@@ -44,7 +46,7 @@ export const UrgentBanner: React.FC<UrgentBannerProps> = ({ tasks, onComplete })
                 <span className="text-xs text-red-500 font-medium">{task.plantName}</span>
               </div>
               <span className="px-2 py-0.5 text-[9px] font-black uppercase bg-red-100 text-red-700 rounded-lg">
-                Scaduto
+                {t('timingOverdue')}
               </span>
             </div>
           ))}
@@ -61,7 +63,7 @@ export const UrgentBanner: React.FC<UrgentBannerProps> = ({ tasks, onComplete })
                 <span className="text-xs text-yellow-600 font-medium">{task.plantName}</span>
               </div>
               <span className="px-2 py-0.5 text-[9px] font-black uppercase bg-yellow-100 text-yellow-700 rounded-lg">
-                Oggi
+                {t('timingToday')}
               </span>
             </div>
           ))}
