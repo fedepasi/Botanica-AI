@@ -210,7 +210,11 @@ export const PlantDetailScreen: React.FC = () => {
         }
 
         try {
-            const cachedPlan = (!forceRegenerate && plant.cachedCarePlan) ? plant.cachedCarePlan : null;
+            // Use cache only if not forcing regen AND language matches the cached plan's language
+            const rawCached = (!forceRegenerate && plant.cachedCarePlan) ? plant.cachedCarePlan : null;
+            const cachedPlan = (rawCached && rawCached._language && rawCached._language !== language)
+                ? null  // Language mismatch — ignore stale cache, regenerate in correct language
+                : rawCached;
 
             const result = await generateDetailedCarePlan(plant, language, {
                 forceRegenerate,
@@ -228,7 +232,7 @@ export const PlantDetailScreen: React.FC = () => {
             }
 
             if (!result.fromCache && user) {
-                await supabaseService.cacheCarePlan(plant.id, user.id, result.structured);
+                await supabaseService.cacheCarePlan(plant.id, user.id, result.structured, language);
                 await refreshGarden();
             }
         } catch (error) {

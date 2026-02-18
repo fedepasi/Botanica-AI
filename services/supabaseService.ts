@@ -419,12 +419,15 @@ export const supabaseService = {
     async cacheCarePlan(
         plantId: string,
         userId: string,
-        carePlan: StructuredCarePlan
+        carePlan: StructuredCarePlan,
+        language?: string
     ): Promise<void> {
+        // Embed language code into the cached plan so we can detect stale cache on language switch
+        const planWithLanguage = language ? { ...carePlan, _language: language } : carePlan;
         const { error } = await supabase
             .from(getPrefixedTableName('plants'))
             .update({
-                cached_care_plan: carePlan,
+                cached_care_plan: planWithLanguage,
                 care_plan_generated_at: new Date().toISOString(),
                 care_plan_needs_regeneration: false,
             })

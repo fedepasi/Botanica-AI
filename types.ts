@@ -191,6 +191,8 @@ export interface StructuredCarePlan {
   harvesting?: CarePlanHarvesting;
   warnings?: string[];
   tips?: string[];
+  /** Language code used when generating this plan (e.g. 'it', 'en'). Used to detect stale cache on language switch. */
+  _language?: string;
 }
 
 // Legacy care plan response (for backward compatibility)
