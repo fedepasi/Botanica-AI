@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HomeScreen } from './screens/HomeScreen';
 import { GardenScreen } from './screens/GardenScreen';
@@ -12,6 +12,7 @@ import { BottomNav } from './components/BottomNav';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { CareplanProvider } from './contexts/CareplanContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { initAnalytics } from './services/analyticsService';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
   constructor(props: { children: ReactNode }) {
@@ -82,6 +83,11 @@ const AppContent: React.FC = () => {
 };
 
 export const App: React.FC = () => {
+  // Initialize analytics on app start
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+
   return (
     <ErrorBoundary>
       <HashRouter>
