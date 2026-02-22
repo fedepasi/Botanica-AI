@@ -2,8 +2,8 @@
 
 **Project:** Botanica-AI  
 **Caretaker:** Anica 🌱  
-**Current Phase:** DEVELOPMENT → GROWTH  
-**Last Updated:** 2026-02-12
+**Current Phase:** PRODUCT (Beta-Ready)  
+**Last Updated:** 2026-02-22
 
 ---
 
@@ -13,12 +13,12 @@ L'unico AI orticoltore personale — un'app che guida gli utenti nella cura del 
 
 ---
 
-## 📍 Current Phase: DEVELOPMENT → GROWTH
+## 📍 M1 Status: Beta Launch Ready (95%)
 
-### Milestone Attuale: Beta Launch Prep
-**Target:** Preparare l'app per il primo rilascio beta con utenti reali
+### Milestone 1: Beta Launch (Target: 28 Feb 2026)
+**Obiettivo:** Lanciare l'app con 20 beta testers e 0 bug critici
 
-**Stato:** 90% completato — funzionalità core pronte, mancano test e analytics
+**Stato:** ✅ **95% completato** — app funzionante, QA E2E passed, pronta per beta
 
 ### Task Completati ( ultimi 7 giorni )
 - ✅ Task #21: Piano di cura strutturato JSON — DONE
@@ -46,13 +46,17 @@ L'unico AI orticoltore personale — un'app che guida gli utenti nella cura del 
 
 **Obiettivo:** Preparare l'app per il primo rilascio beta con utenti reali
 
-### Checklist Pre-Beta
-- [x] Migrazioni SQL eseguite su Supabase (004_plant_notes_diary.sql, 005_care_plan_cache.sql)
-- [x] Edge Functions deployate (gemini, careplan-cache)
-- [x] Homepage UX refactoring implementato (Task #22)
-- [ ] Test E2E su mobile (PWA) — IN PROGRESS
-- [ ] Setup analytics (Supabase + event tracking) — TODO
-- [ ] Partnership ODC: pitch inviato e call fatta — ATTESA FEDERICO
+### Checklist M1 — Beta Launch
+- [x] Migrazioni SQL eseguite (004, 005)
+- [x] Edge Functions deployate (gemini + careplan-cache)
+- [x] Homepage UX refactoring (Task #22)
+- [x] Upload foto chat (Task #35)
+- [x] QA E2E completo — 74 test, 43 ✅ passati (17 feb)
+- [x] Bug P0 JWT risolto (commit a1bb7fa)
+- [x] PWA installabile — manifest + service worker
+- [ ] **20 beta testers reclutati** — 0/20 (CRITICO)
+- [ ] Analytics setup (Plausible/GA4) — PROPOSTO
+- [ ] Partnership ODC: pitch + call — DRAFT PRONTO
 
 ### Post-Beta (Phase: GROWTH)
 - [ ] Onboarding flow ottimizzato
@@ -74,20 +78,34 @@ L'unico AI orticoltore personale — un'app che guida gli utenti nella cura del 
 
 ---
 
-## 🌱 Prossime Azioni (cosa posso fare oggi)
+## 🌱 Azioni Immediate (Settimana 24-28 Feb)
 
-1. **Testing:** Creare E2E Testing Checklist per beta testing mobile — IN CORSO
-2. **Analytics:** Setup tracking plan per eventi core (onboarding, plant add, task complete)
-3. **Documentazione:** Aggiornare deploy checklist con post-deploy verification
-4. **Marketing:** Bozze contenuti social per lancio beta
+### P0 — Lancio Beta (questa settimana)
+1. ✅ **Draft pitch ODC** — email value prop pronta per Federico
+2. 🔴 **Recluta 5-10 beta testers** — r/gardening, forum giardinaggio IT
+3. 🟡 **Setup analytics** — Plausible o GA4 per baseline metrics
+4. 🟢 **Prepare onboarding guide** — PDF/video tutorial per beta testers
+
+### M2 Planning (post-beta)
+- Push notifications (FCM setup)
+- Onboarding flow ottimizzato (3 screen: welcome → add plant → tips)
+- Multi-language (i18n EN completo)
+- Content marketing (5 post r/gardening, blog seeding)
 
 ---
 
-## 📝 Note
+## 📝 Note & Status
 
-- ✅ Migrazioni SQL eseguite e Edge Functions deployate (13 feb 2026)
-- ✅ Homepage UX refactoring implementato e su main
-- ✅ Upload foto in chat completato con resize automatico
-- ⏸️ Task #22 implementato, necessita test E2E su mobile
-- ⏸️ Task #18 (pitch ODC) in attesa approvazione Federico per invio
+**22 Feb 2026:**
+- ✅ App beta-ready — tutte feature core funzionanti
+- ✅ QA E2E completato — 0 bug critici aperti
+- 🔴 **Blocker critico:** 0 beta testers — serve recruitment attivo
+- 🟡 Task #18 (ODC pitch) — email draft pronta, attendo timing Federico
+- 🟢 Analytics proposto — non critico per beta ma utile per metrics
+
+**Week Goals (24-28 Feb):**
+1. Draft pitch ODC → send to Federico
+2. Recruit 5-10 beta testers da Reddit/forum
+3. Setup analytics baseline
+4. Prepare beta tester onboarding guide
 
