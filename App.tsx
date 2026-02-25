@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode, useEffect } from 'react';
+import React, { Component, ErrorInfo, ReactNode, useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HomeScreen } from './screens/HomeScreen';
 import { GardenScreen } from './screens/GardenScreen';
@@ -9,9 +9,11 @@ import { ProfileScreen } from './screens/ProfileScreen';
 import { ChatScreen } from './screens/ChatScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { BottomNav } from './components/BottomNav';
+import { OnboardingFlow } from './components/OnboardingFlow';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { CareplanProvider } from './contexts/CareplanContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { useGarden } from './hooks/useGarden';
 import { initAnalytics } from './services/analyticsService';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -50,8 +52,19 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
   }
 }
 
+const ONBOARDING_KEY = 'botanica_onboarding_done';
+
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
+  const { plants, isLoaded: isGardenLoaded } = useGarden();
+  const [onboardingDone, setOnboardingDone] = useState<boolean>(() => {
+    return localStorage.getItem(ONBOARDING_KEY) === 'true';
+  });
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    setOnboardingDone(true);
+  };
 
   if (loading) {
     return (
@@ -63,6 +76,13 @@ const AppContent: React.FC = () => {
 
   if (!user) {
     return <AuthScreen />;
+  }
+
+  // Show onboarding only once for new users with 0 plants
+  const showOnboarding = !onboardingDone && isGardenLoaded && plants.length === 0;
+
+  if (showOnboarding) {
+    return <OnboardingFlow onComplete={handleOnboardingComplete} />;
   }
 
   return (

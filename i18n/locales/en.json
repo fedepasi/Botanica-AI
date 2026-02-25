@@ -103,5 +103,14 @@
     "urgentPlural": "urgent",
     "plantSingular": "plant",
     "plantPlural": "plants",
-    "taskLabel": "task"
+    "taskLabel": "task",
+    "onboarding1Title": "Your Smart Garden Assistant",
+    "onboarding1Desc": "Botanica-AI learns your plants and generates a personalized annual care plan — just for your garden.",
+    "onboarding2Title": "Never Miss a Season",
+    "onboarding2Desc": "Pruning, seeding, watering, harvesting — your plants will tell you exactly what to do and when.",
+    "onboarding3Title": "Ask Anica Anything",
+    "onboarding3Desc": "Got a question about a plant? Just ask Anica, your AI garden advisor. She even identifies plants from photos.",
+    "onboardingSkip": "Skip",
+    "onboardingNext": "Next",
+    "onboardingAddFirstPlant": "Add My First Plant"
 }

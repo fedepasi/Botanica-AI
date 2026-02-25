@@ -103,5 +103,14 @@
     "urgentPlural": "urgenti",
     "plantSingular": "pianta",
     "plantPlural": "piante",
-    "taskLabel": "task"
+    "taskLabel": "task",
+    "onboarding1Title": "Il Tuo Assistente per il Giardino",
+    "onboarding1Desc": "Botanica-AI impara le tue piante e genera un piano di cura annuale personalizzato — solo per il tuo giardino.",
+    "onboarding2Title": "Non Perdere Mai una Stagione",
+    "onboarding2Desc": "Potatura, semina, irrigazione, raccolta — le tue piante ti diranno esattamente cosa fare e quando.",
+    "onboarding3Title": "Chiedi ad Anica Qualsiasi Cosa",
+    "onboarding3Desc": "Hai una domanda su una pianta? Chiedi ad Anica, la tua consulente AI per il giardino. Identifica anche le piante dalle foto.",
+    "onboardingSkip": "Salta",
+    "onboardingNext": "Avanti",
+    "onboardingAddFirstPlant": "Aggiungi la Mia Prima Pianta"
 }
