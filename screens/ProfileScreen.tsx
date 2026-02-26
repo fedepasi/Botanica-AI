@@ -1,10 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
+
+const APP_URL = 'https://botanica-ai.vercel.app';
 
 export const ProfileScreen: React.FC = () => {
   const { t, language, setLanguage } = useTranslation();
   const { user, signOut } = useAuth();
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: 'Botanica-AI — Il tuo orticoltore AI personale',
+      text: language === 'it'
+        ? '🌱 Ho trovato questa app fantastica per gestire il mio orto con l\'AI! Prova Botanica-AI gratis.'
+        : '🌱 Found this amazing app to manage my garden with AI! Try Botanica-AI for free.',
+      url: APP_URL,
+    };
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(APP_URL);
+        setLinkCopied(true);
+        setTimeout(() => setLinkCopied(false), 3000);
+      }
+    } catch (err) {
+      // User cancelled share or clipboard failed
+      console.log('Share cancelled or failed', err);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(APP_URL);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 3000);
+    } catch (err) {
+      console.log('Copy failed', err);
+    }
+  };
 
   return (
     <div className="p-6 pb-24 font-outfit min-h-screen bg-garden-beige">
@@ -77,6 +114,53 @@ export const ProfileScreen: React.FC = () => {
               <span className={`text-[10px] font-black uppercase tracking-widest ${language === 'it' ? 'text-garden-green' : 'text-gray-500'}`}>
                 {t('italian')}
               </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Beta Tester Box */}
+        <div className="bg-white rounded-[40px] shadow-sm border-2 border-garden-green/20 overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-garden-green to-garden-green/80 p-6 pb-5">
+            <div className="flex items-center space-x-3 mb-2">
+              <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                <i className="fa-solid fa-seedling text-white text-lg"></i>
+              </div>
+              <h3 className="text-white font-black text-sm uppercase tracking-widest">{t('betaTitle')}</h3>
+            </div>
+            <p className="text-white/80 text-xs leading-relaxed font-medium">{t('betaDesc')}</p>
+          </div>
+
+          {/* Share Section */}
+          <div className="p-6 space-y-4">
+            <div>
+              <p className="text-[10px] text-garden-green font-black uppercase tracking-widest mb-1">{t('betaShareTitle')}</p>
+              <p className="text-xs text-gray-600 font-medium leading-relaxed">{t('betaShareDesc')}</p>
+            </div>
+
+            {/* Share URL display */}
+            <div className="flex items-center bg-garden-beige rounded-2xl px-4 py-3 gap-3">
+              <i className="fa-solid fa-link text-garden-green text-sm flex-shrink-0"></i>
+              <span className="text-xs text-gray-600 font-medium flex-1 truncate">botanica-ai.vercel.app</span>
+              <button
+                onClick={handleCopyLink}
+                className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl transition-all ${
+                  linkCopied
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-garden-green/10 text-garden-green hover:bg-garden-green/20'
+                }`}
+              >
+                {linkCopied ? t('betaLinkCopied') : t('betaCopyLink')}
+              </button>
+            </div>
+
+            {/* Share button */}
+            <button
+              onClick={handleShare}
+              className="w-full bg-garden-green text-white py-4 rounded-[24px] font-black text-xs uppercase tracking-widest flex items-center justify-center space-x-2 shadow-lg shadow-garden-green/20 active:scale-95 transition-all hover:bg-garden-green/90"
+            >
+              <i className="fa-solid fa-share-nodes text-sm"></i>
+              <span>{t('betaShareButton')}</span>
             </button>
           </div>
         </div>

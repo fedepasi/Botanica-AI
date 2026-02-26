@@ -112,5 +112,14 @@
     "onboarding3Desc": "Got a question about a plant? Just ask Anica, your AI garden advisor. She even identifies plants from photos.",
     "onboardingSkip": "Skip",
     "onboardingNext": "Next",
-    "onboardingAddFirstPlant": "Add My First Plant"
+    "onboardingAddFirstPlant": "Add My First Plant",
+    "betaTitle": "You're a Beta Tester 🌱",
+    "betaDesc": "You're among the very first to use Botanica-AI. Your feedback is crucial to help this project grow.",
+    "betaShareTitle": "Know any gardeners?",
+    "betaShareDesc": "Share Botanica-AI with friends who have a garden or orchard. Help us reach 20 beta testers!",
+    "betaShareButton": "Share the App",
+    "betaCopyLink": "Copy Link",
+    "betaLinkCopied": "Link copied! ✓",
+    "betaFeedbackTitle": "Found something wrong?",
+    "betaFeedbackDesc": "Talk to Anica about it or mention it directly in your profile."
 }
