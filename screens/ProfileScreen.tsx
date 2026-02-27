@@ -3,6 +3,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
 
 const APP_URL = 'https://botanica-ai.vercel.app';
+const APP_URL_SHARE = `${APP_URL}?utm_source=share&utm_medium=referral&utm_campaign=beta_invite`;
 
 export const ProfileScreen: React.FC = () => {
   const { t, language, setLanguage } = useTranslation();
@@ -15,7 +16,7 @@ export const ProfileScreen: React.FC = () => {
       text: language === 'it'
         ? '🌱 Ho trovato questa app fantastica per gestire il mio orto con l\'AI! Prova Botanica-AI gratis.'
         : '🌱 Found this amazing app to manage my garden with AI! Try Botanica-AI for free.',
-      url: APP_URL,
+      url: APP_URL_SHARE,
     };
 
     try {
@@ -23,7 +24,7 @@ export const ProfileScreen: React.FC = () => {
         await navigator.share(shareData);
       } else {
         // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(APP_URL);
+        await navigator.clipboard.writeText(APP_URL_SHARE);
         setLinkCopied(true);
         setTimeout(() => setLinkCopied(false), 3000);
       }
@@ -35,7 +36,7 @@ export const ProfileScreen: React.FC = () => {
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(APP_URL);
+      await navigator.clipboard.writeText(APP_URL_SHARE);
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 3000);
     } catch (err) {

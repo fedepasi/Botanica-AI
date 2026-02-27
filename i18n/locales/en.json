@@ -121,5 +121,7 @@
     "betaCopyLink": "Copy Link",
     "betaLinkCopied": "Link copied! ✓",
     "betaFeedbackTitle": "Found something wrong?",
-    "betaFeedbackDesc": "Talk to Anica about it or mention it directly in your profile."
+    "betaFeedbackDesc": "Talk to Anica about it or mention it directly in your profile.",
+    "referralBannerTitle": "A friend invited you! 🌱",
+    "referralBannerDesc": "Create a free account and start managing your garden with AI."
 }

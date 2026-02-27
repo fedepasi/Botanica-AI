@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -9,6 +9,18 @@ export const AuthScreen: React.FC = () => {
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
     const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null);
+    const [isReferral, setIsReferral] = useState(false);
+
+    useEffect(() => {
+        // Detect referral/share UTM params — pre-select Sign Up tab for new visitors
+        const params = new URLSearchParams(window.location.search);
+        const utmSource = params.get('utm_source');
+        const utmCampaign = params.get('utm_campaign');
+        if (utmSource === 'share' && utmCampaign === 'beta_invite') {
+            setIsReferral(true);
+            setIsSignUp(true); // Pre-select Sign Up for referred users
+        }
+    }, []);
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,6 +52,17 @@ export const AuthScreen: React.FC = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-garden-beige px-4 py-12 sm:px-6 lg:px-8 font-outfit">
             <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-[48px] shadow-2xl shadow-garden-green/5 border border-gray-100">
+                {isReferral && (
+                    <div className="bg-gradient-to-r from-garden-green to-garden-green/80 rounded-[28px] p-5 text-center">
+                        <div className="text-2xl mb-2">🌱</div>
+                        <p className="text-white font-black text-sm uppercase tracking-widest mb-1">
+                            {t('referralBannerTitle') || 'Un amico ti ha invitato!'}
+                        </p>
+                        <p className="text-white/80 text-xs font-medium leading-relaxed">
+                            {t('referralBannerDesc') || 'Crea un account gratuito e inizia a gestire il tuo orto con l\'AI.'}
+                        </p>
+                    </div>
+                )}
                 <div className="text-center">
                     <div className="w-24 h-24 bg-garden-green rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-garden-green/20">
                         <i className="fa-solid fa-seedling text-4xl text-white"></i>
