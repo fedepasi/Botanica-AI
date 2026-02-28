@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCareplan } from '../hooks/useCareplan';
 import { useTranslation } from '../hooks/useTranslation';
 import { useGroupedTasks } from '../hooks/useGroupedTasks';
@@ -43,6 +44,7 @@ const WeatherDisplay: React.FC = () => {
 export const HomeScreen: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { plants, isLoaded: isGardenLoaded } = useGarden();
   const { isLoading, isAdapting, error } = useCareplan();
   const {
@@ -136,17 +138,71 @@ export const HomeScreen: React.FC = () => {
 
       {/* Empty state */}
       {totalPending === 0 && completedTasks.length === 0 && (
-        <div className="text-center py-16 px-6 bg-white border border-dashed border-gray-200 rounded-[40px] shadow-sm">
-          <div className="w-24 h-24 bg-garden-beige rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="fa-solid fa-mug-saucer text-5xl text-gray-300"></i>
+        hasPlants ? (
+          <div className="text-center py-16 px-6 bg-white border border-dashed border-gray-200 rounded-[40px] shadow-sm">
+            <div className="w-24 h-24 bg-garden-beige rounded-full flex items-center justify-center mx-auto mb-6">
+              <i className="fa-solid fa-mug-saucer text-5xl text-gray-300"></i>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 tracking-tight">{t('noTasksToday')}</h2>
+            <p className="text-gray-500 mt-2 font-medium">{t('noTasksMessage')}</p>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 tracking-tight">
-            {hasPlants ? t('noTasksToday') : t('noPlantsTitle')}
-          </h2>
-          <p className="text-gray-500 mt-2 font-medium">
-            {hasPlants ? t('noTasksMessage') : t('noPlantsMessage')}
-          </p>
-        </div>
+        ) : (
+          /* Onboarding card for new users with 0 plants */
+          <div className="py-6 px-2">
+            {/* Hero area */}
+            <div className="text-center mb-8">
+              <div className="w-28 h-28 bg-gradient-to-br from-garden-green/20 to-garden-yellow/20 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+                <i className="fa-solid fa-seedling text-6xl text-garden-green"></i>
+              </div>
+              <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-2">{t('noPlantsTitle')}</h2>
+              <p className="text-gray-500 font-medium text-base">{t('noPlantsMessage')}</p>
+            </div>
+
+            {/* Feature highlights */}
+            <div className="space-y-3 mb-8">
+              <div className="flex items-start space-x-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <div className="w-10 h-10 bg-garden-green/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <i className="fa-solid fa-calendar-check text-garden-green text-lg"></i>
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900 text-sm">{t('onboarding2Title')}</p>
+                  <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{t('onboarding2Desc')}</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <div className="w-10 h-10 bg-garden-yellow/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <i className="fa-solid fa-message text-garden-green text-lg"></i>
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900 text-sm">{t('onboarding3Title')}</p>
+                  <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{t('onboarding3Desc')}</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <div className="w-10 h-10 bg-garden-green/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <i className="fa-solid fa-wand-magic-sparkles text-garden-green text-lg"></i>
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900 text-sm">{t('onboarding1Title')}</p>
+                  <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{t('onboarding1Desc')}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <button
+              onClick={() => navigate('/garden/add')}
+              className="w-full bg-garden-green text-white font-black py-5 px-8 rounded-2xl shadow-lg shadow-garden-green/25 hover:scale-[1.02] active:scale-[0.98] transition-all text-base uppercase tracking-widest flex items-center justify-center space-x-3"
+            >
+              <i className="fa-solid fa-plus text-lg"></i>
+              <span>{t('onboardingAddFirstPlant')}</span>
+            </button>
+
+            <p className="text-center text-xs text-gray-400 mt-4 font-medium">
+              🔒 {t('freeForever') || 'Gratuito. Nessuna carta di credito richiesta.'}
+            </p>
+          </div>
+        )
       )}
     </div>
   );
