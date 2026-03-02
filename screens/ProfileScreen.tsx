@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 
 const APP_URL = 'https://botanica-ai.vercel.app';
 const APP_URL_SHARE = `${APP_URL}?utm_source=share&utm_medium=referral&utm_campaign=beta_invite`;
+// Beta feedback form URL — update with real Google Form link before launch
+const FEEDBACK_FORM_URL = 'https://forms.gle/PLACEHOLDER_FORM_ID';
 
 export const ProfileScreen: React.FC = () => {
   const { t, language, setLanguage } = useTranslation();
@@ -163,6 +165,23 @@ export const ProfileScreen: React.FC = () => {
               <i className="fa-solid fa-share-nodes text-sm"></i>
               <span>{t('betaShareButton')}</span>
             </button>
+
+            {/* Feedback separator */}
+            <div className="border-t border-garden-green/10 pt-4 mt-2">
+              <div>
+                <p className="text-[10px] text-garden-green font-black uppercase tracking-widest mb-1">{t('betaFeedbackTitle')}</p>
+                <p className="text-xs text-gray-600 font-medium leading-relaxed mb-3">{t('betaFeedbackDesc')}</p>
+              </div>
+              <a
+                href={FEEDBACK_FORM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-garden-beige border border-garden-green/20 text-garden-green py-3.5 rounded-[24px] font-black text-xs uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-garden-green/5 active:scale-95 transition-all"
+              >
+                <i className="fa-solid fa-comment-dots text-sm"></i>
+                <span>{language === 'it' ? 'Invia Feedback' : 'Send Feedback'}</span>
+              </a>
+            </div>
           </div>
         </div>
 
