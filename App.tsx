@@ -15,6 +15,7 @@ import { CareplanProvider } from './contexts/CareplanContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useGarden } from './hooks/useGarden';
 import { initAnalytics } from './services/analyticsService';
+import { FeedbackWidget } from './components/FeedbackWidget';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
   constructor(props: { children: ReactNode }) {
@@ -98,6 +99,7 @@ const AppContent: React.FC = () => {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />
+      <FeedbackWidget />
     </main>
   );
 };

@@ -519,3 +519,27 @@ export const supabaseService = {
         }));
     },
 };
+
+// Feedback methods added separately to avoid file conflict
+export const feedbackService = {
+    async submitFeedback(params: {
+        userId: string | null;
+        userEmail: string | null;
+        feedbackType: 'bug' | 'ux' | 'idea' | 'praise';
+        message: string;
+        currentScreen?: string;
+        appLanguage?: string;
+    }): Promise<void> {
+        const { error } = await supabase
+            .from('botanica_beta_feedback')
+            .insert({
+                user_id: params.userId,
+                user_email: params.userEmail,
+                feedback_type: params.feedbackType,
+                message: params.message,
+                current_screen: params.currentScreen || null,
+                app_language: params.appLanguage || 'en',
+            });
+        if (error) throw error;
+    }
+};
