@@ -238,12 +238,14 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }, [user, plants, allTasks, language, loadTasks]);
 
   // Migration: generate plans for existing plants without tasks
+  // Also detects language mismatch and regenerates tasks in the correct language
   const migrateExistingPlants = useCallback(async () => {
     if (!user || plants.length === 0) return;
 
     for (const plant of plants) {
       const hasTasks = await supabaseService.hasTasksForPlant(plant.id, user.id);
       if (!hasTasks) {
+        // No tasks yet: generate from scratch
         try {
           const annualTasks = await generateAnnualCareplan(
             plant,
@@ -257,6 +259,28 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
           }
         } catch (e) {
           console.error(`Failed to generate annual plan for ${plant.name}:`, e);
+        }
+      } else {
+        // Tasks exist: check if they are in the correct language
+        try {
+          const taskLang = await supabaseService.getTaskLanguageForPlant(plant.id, user.id);
+          if (taskLang && taskLang !== language) {
+            // Language mismatch: delete pending tasks and regenerate in current language
+            console.log(`[language migration] ${plant.name}: tasks in ${taskLang}, user wants ${language} — regenerating`);
+            await supabaseService.deletePendingTasksForPlant(plant.id, user.id);
+            const annualTasks = await generateAnnualCareplan(
+              plant,
+              coordsRef.current,
+              weatherRef.current,
+              language
+            );
+            if (annualTasks.length > 0) {
+              const batchId = `lang_migrate_${plant.id}_${Date.now()}`;
+              await supabaseService.createTasks(user.id, plant.id, plant.name, annualTasks, language, batchId);
+            }
+          }
+        } catch (e) {
+          console.error(`Failed to check/migrate language for ${plant.name}:`, e);
         }
       }
     }

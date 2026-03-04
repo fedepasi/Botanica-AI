@@ -284,6 +284,29 @@ export const supabaseService = {
         return (count || 0) > 0;
     },
 
+    async getTaskLanguageForPlant(plantId: string, userId: string): Promise<string | null> {
+        const { data, error } = await supabase
+            .from(getPrefixedTableName('tasks'))
+            .select('language')
+            .eq('plant_id', plantId)
+            .eq('user_id', userId)
+            .eq('status', 'pending')
+            .limit(1)
+            .single();
+        if (error) return null;
+        return data?.language ?? null;
+    },
+
+    async deletePendingTasksForPlant(plantId: string, userId: string): Promise<void> {
+        const { error } = await supabase
+            .from(getPrefixedTableName('tasks'))
+            .delete()
+            .eq('plant_id', plantId)
+            .eq('user_id', userId)
+            .eq('status', 'pending');
+        if (error) throw error;
+    },
+
     async getCompletedTaskHistory(userId: string, months: number = 3): Promise<PersistentTask[]> {
         const since = new Date();
         since.setMonth(since.getMonth() - months);
