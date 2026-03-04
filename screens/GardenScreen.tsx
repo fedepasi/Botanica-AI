@@ -16,10 +16,13 @@ export const GardenScreen: React.FC = () => {
     const statuses: { [plantId: string]: PlantStatus } = {};
     if (isCareplanLoading || !tasks) return statuses;
 
-    // Group pending tasks by plantId
+    // Group URGENT tasks by plantId (overdue, today, this_week only)
+    // A plant is "needs_attention" only if it has tasks due now/soon, not months away
     const pendingByPlant = new Set<string>();
     tasks.forEach(task => {
-      pendingByPlant.add(task.plantId);
+      if (task.timing === 'overdue' || task.timing === 'today' || task.timing === 'this_week') {
+        pendingByPlant.add(task.plantId);
+      }
     });
 
     plants.forEach(plant => {

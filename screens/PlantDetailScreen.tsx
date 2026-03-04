@@ -237,7 +237,7 @@ export const PlantDetailScreen: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to fetch care plan:', error);
-            setCarePlanHtml('<p class="text-red-500">Failed to load care plan. Please try again.</p>');
+            setCarePlanHtml(`<p class="text-red-500">${t('errorCarePlan') || 'Failed to load care plan. Please try again.'}</p>`);
         } finally {
             setIsLoadingCarePlan(false);
             setIsRegenerating(false);

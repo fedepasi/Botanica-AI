@@ -124,5 +124,18 @@
   "betaFeedbackDesc": "Talk to Anica about it or mention it directly in your profile.",
   "referralBannerTitle": "A friend invited you! 🌱",
   "referralBannerDesc": "Create a free account and start managing your garden with AI.",
-  "freeForever": "Free forever. No credit card required."
+  "freeForever": "Free forever. No credit card required.",
+  "daysAgo": "days ago",
+  "generated": "Generated",
+  "generatedToday": "Generated today",
+  "generatedYesterday": "Generated yesterday",
+  "fromCache": "From cache",
+  "freshlyGenerated": "Freshly generated",
+  "regenerate": "Regenerate",
+  "regenerateCarePlan": "Regenerate care plan",
+  "errorUserNotLoggedIn": "User not logged in. Please sign in again.",
+  "failedToAddPlant": "Failed to add plant. Please try again.",
+  "errorResizingImage": "Error resizing image",
+  "errorCarePlan": "Failed to load care plan. Please try again.",
+  "aiTyping": "Anica is typing..."
 }

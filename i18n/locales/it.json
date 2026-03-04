@@ -124,5 +124,18 @@
   "betaFeedbackDesc": "Parlane con Anica o segnalalo direttamente nel profilo.",
   "referralBannerTitle": "Un amico ti ha invitato! 🌱",
   "referralBannerDesc": "Crea un account gratuito e inizia a gestire il tuo orto con l'AI.",
-  "freeForever": "Gratuito. Nessuna carta di credito richiesta."
+  "freeForever": "Gratuito. Nessuna carta di credito richiesta.",
+  "daysAgo": "giorni fa",
+  "generated": "Generato",
+  "generatedToday": "Generato oggi",
+  "generatedYesterday": "Generato ieri",
+  "fromCache": "Dalla cache",
+  "freshlyGenerated": "Appena generato",
+  "regenerate": "Rigenera",
+  "regenerateCarePlan": "Rigenera piano di cura",
+  "errorUserNotLoggedIn": "Utente non autenticato. Accedi di nuovo.",
+  "failedToAddPlant": "Aggiunta pianta fallita. Riprova.",
+  "errorResizingImage": "Errore nel ridimensionamento immagine",
+  "errorCarePlan": "Caricamento piano di cura fallito. Riprova.",
+  "aiTyping": "Anica sta scrivendo..."
 }

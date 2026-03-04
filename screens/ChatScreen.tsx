@@ -70,6 +70,7 @@ export const ChatScreen: React.FC = () => {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [isResizing, setIsResizing] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -87,13 +88,13 @@ export const ChatScreen: React.FC = () => {
 
         // Validate image
         if (!file.type.startsWith('image/')) {
-            alert(t('invalidImageType') || 'Seleziona un file immagine');
+            setUploadError(t('invalidImageType') || 'Seleziona un file immagine. Supported: JPG, PNG, GIF, WebP'); return;
             return;
         }
 
         // Max 10MB before resize
         if (file.size > 10 * 1024 * 1024) {
-            alert(t('imageTooLarge') || 'L\'immagine è troppo grande (max 10MB prima del resize)');
+            setUploadError(t('imageTooLarge') || 'Immagine troppo grande (max 10MB)'); return;
             return;
         }
 
@@ -109,7 +110,7 @@ export const ChatScreen: React.FC = () => {
             setImageFile(resizedFile);
         } catch (error) {
             console.error('Resize error:', error);
-            alert('Errore nel ridimensionamento dell\'immagine');
+            setUploadError(t('errorResizingImage') || 'Errore nel ridimensionamento immagine');
         } finally {
             setIsResizing(false);
         }
@@ -284,6 +285,17 @@ export const ChatScreen: React.FC = () => {
                 </div>
             )}
 
+            {/* Upload Error Banner */}
+            {uploadError && (
+                <div className="mx-6 mb-2 p-3 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm flex items-center space-x-2">
+                    <i className="fa-solid fa-triangle-exclamation flex-shrink-0"></i>
+                    <span className="flex-grow font-medium">{uploadError}</span>
+                    <button onClick={() => setUploadError(null)} className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors">
+                        <i className="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                </div>
+            )}
+
             {/* Input Area */}
             <div className="p-6 bg-transparent">
                 <div className="flex items-center space-x-3 bg-white p-3 rounded-[32px] border-2 border-transparent shadow-2xl shadow-garden-green/10 focus-within:border-garden-green transition-all">
@@ -313,10 +325,10 @@ export const ChatScreen: React.FC = () => {
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder={isResizing ? (t('resizingImage') || 'Ridimensionamento...') : (imagePreview ? t('addDescription') || 'Aggiungi una descrizione...' : t('chatPlaceholder'))}
-                        disabled={isResizing}
-                        className="flex-grow bg-transparent px-4 py-2 focus:outline-none text-sm font-medium disabled:opacity-50"
+                        onKeyPress={(e) => e.key === 'Enter' && !isTyping && handleSendMessage()}
+                        placeholder={isResizing ? (t('resizingImage') || 'Ridimensionamento...') : isTyping ? (t('aiTyping') || 'Anica sta scrivendo...') : (imagePreview ? t('addDescription') || 'Aggiungi una descrizione...' : t('chatPlaceholder'))}
+                        disabled={isResizing || isTyping}
+                        className="flex-grow bg-transparent px-4 py-2 focus:outline-none text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <button
                         onClick={handleSendMessage}
