@@ -18,7 +18,7 @@ interface PlantDiaryProps {
 }
 
 export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
-  const { language } = useTranslation();
+  const { language, t } = useTranslation();
   const lang = language === 'it' ? 'it' : 'en';
   
   const [groupedNotes, setGroupedNotes] = useState<GroupedPlantNotes>({
@@ -64,7 +64,7 @@ export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
         title: newNoteTitle.trim() || undefined,
         category: newNoteCategory,
         entryDate: newNoteDate,
-        tags: newNoteTags.split(',').map(t => t.trim()).filter(Boolean),
+        tags: newNoteTags.split(',').map(tag => tag.trim()).filter(Boolean),
       };
 
       await createPlantNote(input);
@@ -94,7 +94,7 @@ export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
   };
 
   const handleDelete = async (noteId: string) => {
-    if (!confirm(language === 'it' ? 'Eliminare questa nota?' : 'Delete this note?')) return;
+    if (!confirm(t('deleteNoteConfirm') || 'Delete this note?')) return;
     
     try {
       await deletePlantNote(noteId);
@@ -127,7 +127,7 @@ export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
     return (
       <div className="p-4 text-center">
         <div className="animate-pulse text-gray-400">
-          {lang === 'it' ? 'Caricamento diario...' : 'Loading diary...'}
+          {t('diaryLoading') || 'Loading diary...'}
         </div>
       </div>
     );
@@ -138,15 +138,15 @@ export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-900">
-          {lang === 'it' ? '📖 Diario della pianta' : '📖 Plant Diary'}
+          {t('diaryTitle') || '📖 Plant Diary'}
         </h2>
         <button
           onClick={() => setIsAdding(!isAdding)}
           className="px-4 py-2 bg-garden-green text-white rounded-full text-sm font-medium hover:bg-garden-green/90 transition-colors"
         >
           {isAdding 
-            ? (lang === 'it' ? 'Annulla' : 'Cancel')
-            : (lang === 'it' ? '+ Aggiungi nota' : '+ Add note')
+            ? (t('diaryCancel') || 'Cancel')
+            : (t('diaryAddNote') || '+ Add note')
           }
         </button>
       </div>
@@ -158,16 +158,14 @@ export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
             type="text"
             value={newNoteTitle}
             onChange={(e) => setNewNoteTitle(e.target.value)}
-            placeholder={lang === 'it' ? 'Titolo (opzionale)' : 'Title (optional)'}
+            placeholder={t('noteTitlePlaceholder') || 'Title (optional)'}
             className="w-full px-4 py-2 bg-gray-50 rounded-xl border-transparent focus:border-garden-green focus:bg-white outline-none text-sm font-medium"
           />
           
           <textarea
             value={newNoteContent}
             onChange={(e) => setNewNoteContent(e.target.value)}
-            placeholder={lang === 'it' 
-              ? 'Scrivi una nota... (es. "Ottobre: piantato il nashi")' 
-              : 'Write a note... (e.g., "October: planted the nashi")'}
+            placeholder={t('noteContentPlaceholder') || 'Write a note...'}
             rows={3}
             className="w-full px-4 py-2 bg-gray-50 rounded-xl border-transparent focus:border-garden-green focus:bg-white outline-none text-sm resize-none"
           />
@@ -197,7 +195,7 @@ export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
             type="text"
             value={newNoteTags}
             onChange={(e) => setNewNoteTags(e.target.value)}
-            placeholder={lang === 'it' ? 'Tag separati da virgola' : 'Tags separated by comma'}
+            placeholder={t('noteTagsPlaceholder') || 'Tags separated by comma'}
             className="w-full px-4 py-2 bg-gray-50 rounded-xl border-transparent focus:border-garden-green outline-none text-sm"
           />
 
@@ -206,7 +204,7 @@ export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
             disabled={!newNoteContent.trim()}
             className="w-full py-3 bg-garden-green text-white rounded-xl font-medium hover:bg-garden-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {lang === 'it' ? 'Salva nota' : 'Save note'}
+            {t('noteSave') || 'Save note'}
           </button>
         </div>
       )}
@@ -217,9 +215,7 @@ export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
           <div className="text-center py-8 text-gray-400">
             <div className="text-4xl mb-2">📝</div>
             <p className="text-sm">
-              {lang === 'it' 
-                ? 'Nessuna nota. Inizia a scrivere il diario della tua pianta!' 
-                : 'No notes yet. Start writing your plant diary!'}
+              {t('diaryEmpty') || 'No notes yet. Start writing your plant diary!'}
             </p>
           </div>
         ) : (
@@ -282,8 +278,8 @@ export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
                         onClick={() => handlePinToggle(note)}
                         className={`p-2 rounded-lg transition-colors ${note.isPinned ? 'text-garden-yellow bg-garden-yellow/10' : 'text-gray-400 hover:bg-gray-100'}`}
                         title={note.isPinned 
-                          ? (lang === 'it' ? 'Rimuovi dai preferiti' : 'Unpin')
-                          : (lang === 'it' ? 'Aggiungi ai preferiti' : 'Pin')
+                          ? (t('noteUnpin') || 'Unpin')
+                          : (t('notePin') || 'Pin')
                         }
                       >
                         📌
@@ -291,7 +287,7 @@ export const PlantDiary: React.FC<PlantDiaryProps> = ({ plantId }) => {
                       <button
                         onClick={() => handleDelete(note.id)}
                         className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        title={lang === 'it' ? 'Elimina' : 'Delete'}
+                        title={t('noteDelete') || 'Delete'}
                       >
                         🗑️
                       </button>

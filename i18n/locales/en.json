@@ -137,5 +137,19 @@
   "failedToAddPlant": "Failed to add plant. Please try again.",
   "errorResizingImage": "Error resizing image",
   "errorCarePlan": "Failed to load care plan. Please try again.",
-  "aiTyping": "Anica is typing..."
+  "aiTyping": "Anica is typing...",
+  "diaryLoading": "Loading diary...",
+  "diaryTitle": "📖 Plant Diary",
+  "diaryCancel": "Cancel",
+  "diaryAddNote": "+ Add note",
+  "noteTitlePlaceholder": "Title (optional)",
+  "noteContentPlaceholder": "Write a note... (e.g., \"October: planted the nashi\")",
+  "noteTagsPlaceholder": "Tags separated by comma",
+  "noteSave": "Save note",
+  "diaryEmpty": "No notes yet. Start writing your plant diary!",
+  "notePin": "Pin",
+  "noteUnpin": "Unpin",
+  "noteDelete": "Delete",
+  "deleteNoteConfirm": "Delete this note?",
+  "plantAddedToast": "🌱 {name} added to your garden!"
 }

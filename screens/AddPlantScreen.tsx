@@ -24,6 +24,7 @@ export const AddPlantScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [resultData, setResultData] = useState<ResultData | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -208,7 +209,12 @@ export const AddPlantScreen: React.FC = () => {
           }
         }
 
-        navigate('/garden');
+        // Show success toast then navigate
+        const toastMsg = (t('plantAddedToast') || '🌱 {name} added to your garden!').replace('{name}', resultData.name);
+        setSuccessToast(toastMsg);
+        setTimeout(() => {
+          navigate('/garden');
+        }, 1500);
       } catch (err) {
         setError(err instanceof Error ? err.message : t("failedToAddPlant"));
         setIsLoading(false);
@@ -332,6 +338,13 @@ export const AddPlantScreen: React.FC = () => {
         </div>
 
         <div className="mt-8">
+          {/* Success Toast */}
+          {successToast && (
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-garden-green text-white rounded-2xl shadow-xl font-semibold text-sm animate-fade-in flex items-center space-x-2">
+              <span>{successToast}</span>
+            </div>
+          )}
+
           {error && (
             <div className="p-4 bg-red-50 text-red-500 rounded-2xl text-center text-sm font-bold border border-red-100 animate-shake">
               {error}

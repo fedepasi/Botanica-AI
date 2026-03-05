@@ -137,5 +137,19 @@
   "failedToAddPlant": "Aggiunta pianta fallita. Riprova.",
   "errorResizingImage": "Errore nel ridimensionamento immagine",
   "errorCarePlan": "Caricamento piano di cura fallito. Riprova.",
-  "aiTyping": "Anica sta scrivendo..."
+  "aiTyping": "Anica sta scrivendo...",
+  "diaryLoading": "Caricamento diario...",
+  "diaryTitle": "📖 Diario della pianta",
+  "diaryCancel": "Annulla",
+  "diaryAddNote": "+ Aggiungi nota",
+  "noteTitlePlaceholder": "Titolo (opzionale)",
+  "noteContentPlaceholder": "Scrivi una nota... (es. \"Ottobre: piantato il nashi\")",
+  "noteTagsPlaceholder": "Tag separati da virgola",
+  "noteSave": "Salva nota",
+  "diaryEmpty": "Nessuna nota. Inizia a scrivere il diario della tua pianta!",
+  "notePin": "Aggiungi ai preferiti",
+  "noteUnpin": "Rimuovi dai preferiti",
+  "noteDelete": "Elimina",
+  "deleteNoteConfirm": "Eliminare questa nota?",
+  "plantAddedToast": "🌱 {name} aggiunta al tuo giardino!"
 }
