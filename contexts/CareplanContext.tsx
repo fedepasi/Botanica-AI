@@ -264,9 +264,11 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
         // Tasks exist: check if they are in the correct language
         try {
           const taskLang = await supabaseService.getTaskLanguageForPlant(plant.id, user.id);
-          if (taskLang && taskLang !== language) {
+          // If taskLang is null (legacy tasks without language field), assume 'en'
+          const effectiveTaskLang = taskLang ?? 'en';
+          if (effectiveTaskLang !== language) {
             // Language mismatch: delete pending tasks and regenerate in current language
-            console.log(`[language migration] ${plant.name}: tasks in ${taskLang}, user wants ${language} — regenerating`);
+            console.log(`[language migration] ${plant.name}: tasks in ${effectiveTaskLang} (stored: ${taskLang ?? 'null'}), user wants ${language} — regenerating`);
             await supabaseService.deletePendingTasksForPlant(plant.id, user.id);
             const annualTasks = await generateAnnualCareplan(
               plant,
@@ -314,6 +316,23 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
     init();
   }, [isGardenLoaded, isLanguageLoaded, language, user, fetchWeather, loadTasks, migrateExistingPlants, checkAdaptation]);
+
+  // Re-run migration when language changes (handles language switch after initial load)
+  const prevLanguageRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!hasInitialized.current) return; // Not yet initialized
+    if (!isLanguageLoaded || !language || !user || plants.length === 0) return;
+    if (prevLanguageRef.current === null) {
+      // First time we see a language after init — store it but don't migrate yet
+      prevLanguageRef.current = language;
+      return;
+    }
+    if (prevLanguageRef.current !== language) {
+      prevLanguageRef.current = language;
+      console.log(`[language change] ${prevLanguageRef.current} → ${language} — running migration`);
+      migrateExistingPlants();
+    }
+  }, [language, isLanguageLoaded, user, plants, migrateExistingPlants]);
 
   // Complete a task
   const completeTask = useCallback(async (taskId: string, notes?: string) => {
