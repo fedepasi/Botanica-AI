@@ -89,20 +89,28 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <main className="pb-20 min-h-screen bg-garden-beige font-outfit">
-      <Routes>
-        <Route path="/" element={<HomeScreen />} />
-        <Route path="/garden" element={<GardenScreen />} />
-        <Route path="/garden/add" element={<AddPlantScreen />} />
-        <Route path="/garden/:plantId" element={<PlantDetailScreen />} />
-        <Route path="/calendar" element={<CalendarScreen />} />
-        <Route path="/chat" element={<ChatScreen />} />
-        <Route path="/profile" element={<ProfileScreen />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      <BottomNav />
-      <FeedbackWidget />
-    </main>
+    <Routes>
+      {/* Legal pages — no BottomNav, no padding */}
+      <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
+      <Route path="/terms" element={<TermsScreen />} />
+      {/* App pages — with BottomNav */}
+      <Route path="*" element={
+        <main className="pb-20 min-h-screen bg-garden-beige font-outfit">
+          <Routes>
+            <Route path="/" element={<HomeScreen />} />
+            <Route path="/garden" element={<GardenScreen />} />
+            <Route path="/garden/add" element={<AddPlantScreen />} />
+            <Route path="/garden/:plantId" element={<PlantDetailScreen />} />
+            <Route path="/calendar" element={<CalendarScreen />} />
+            <Route path="/chat" element={<ChatScreen />} />
+            <Route path="/profile" element={<ProfileScreen />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <BottomNav />
+          <FeedbackWidget />
+        </main>
+      } />
+    </Routes>
   );
 };
 
@@ -115,19 +123,13 @@ export const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <HashRouter>
-        <Routes>
-          <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
-          <Route path="/terms" element={<TermsScreen />} />
-          <Route path="*" element={
-            <AuthProvider>
-              <LanguageProvider>
-                <CareplanProvider>
-                  <AppContent />
-                </CareplanProvider>
-              </LanguageProvider>
-            </AuthProvider>
-          } />
-        </Routes>
+        <AuthProvider>
+          <LanguageProvider>
+            <CareplanProvider>
+              <AppContent />
+            </CareplanProvider>
+          </LanguageProvider>
+        </AuthProvider>
       </HashRouter>
     </ErrorBoundary>
   );
