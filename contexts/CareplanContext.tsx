@@ -240,10 +240,12 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
   // Migration: generate plans for existing plants without tasks
   // Also detects language mismatch and regenerates tasks in the correct language
   const migrateExistingPlants = useCallback(async () => {
+    console.log(`[migrateExistingPlants] called — user: ${user?.id ?? 'none'}, plants: ${plants.length}, language: ${language}`);
     if (!user || plants.length === 0) return;
 
     for (const plant of plants) {
       const hasTasks = await supabaseService.hasTasksForPlant(plant.id, user.id);
+      console.log(`[migrateExistingPlants] ${plant.name}: hasTasks=${hasTasks}`);
       if (!hasTasks) {
         // No tasks yet: generate from scratch
         try {
