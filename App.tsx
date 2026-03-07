@@ -16,6 +16,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useGarden } from './hooks/useGarden';
 import { initAnalytics } from './services/analyticsService';
 import { FeedbackWidget } from './components/FeedbackWidget';
+import { PrivacyPolicyScreen } from './screens/PrivacyPolicyScreen';
+import { TermsScreen } from './screens/TermsScreen';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
   constructor(props: { children: ReactNode }) {
@@ -113,13 +115,19 @@ export const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <HashRouter>
-        <AuthProvider>
-          <LanguageProvider>
-            <CareplanProvider>
-              <AppContent />
-            </CareplanProvider>
-          </LanguageProvider>
-        </AuthProvider>
+        <Routes>
+          <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
+          <Route path="/terms" element={<TermsScreen />} />
+          <Route path="*" element={
+            <AuthProvider>
+              <LanguageProvider>
+                <CareplanProvider>
+                  <AppContent />
+                </CareplanProvider>
+              </LanguageProvider>
+            </AuthProvider>
+          } />
+        </Routes>
       </HashRouter>
     </ErrorBoundary>
   );

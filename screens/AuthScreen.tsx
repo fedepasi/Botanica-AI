@@ -148,6 +148,12 @@ export const AuthScreen: React.FC = () => {
                         {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
                     </button>
                 </div>
+
+                <div className="text-center text-xs text-gray-400 mt-6 space-x-3">
+                    <a href="#/privacy-policy" className="hover:text-garden-green transition-colors">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="#/terms" className="hover:text-garden-green transition-colors">Termini di Servizio</a>
+                </div>
             </div>
         </div>
     );
