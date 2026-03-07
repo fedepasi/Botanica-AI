@@ -264,11 +264,12 @@ export const CareplanProvider: FC<{ children: ReactNode }> = ({ children }) => {
         // Tasks exist: check if they are in the correct language
         try {
           const taskLang = await supabaseService.getTaskLanguageForPlant(plant.id, user.id);
-          // If taskLang is null (legacy tasks without language field), assume 'en'
-          const effectiveTaskLang = taskLang ?? 'en';
-          if (effectiveTaskLang !== language) {
-            // Language mismatch: delete pending tasks and regenerate in current language
-            console.log(`[language migration] ${plant.name}: tasks in ${effectiveTaskLang} (stored: ${taskLang ?? 'null'}), user wants ${language} — regenerating`);
+          // If taskLang is null (legacy tasks without language field), treat as unknown language
+          // and always regenerate to ensure tasks are in the user's current language
+          const effectiveTaskLang = taskLang ?? null;
+          if (effectiveTaskLang === null || effectiveTaskLang !== language) {
+            // Language mismatch or unknown: delete pending tasks and regenerate in current language
+            console.log(`[language migration] ${plant.name}: tasks in ${effectiveTaskLang ?? 'unknown (legacy)'}, user wants ${language} — regenerating`);
             await supabaseService.deletePendingTasksForPlant(plant.id, user.id);
             const annualTasks = await generateAnnualCareplan(
               plant,
